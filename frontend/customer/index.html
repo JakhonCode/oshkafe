@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html class="light" lang="uz">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Osh Kafe</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "on-primary-fixed":"#00210c","inverse-primary":"#61de8a","surface-dim":"#dadad7",
+        "on-tertiary-fixed":"#191c1b","surface-container-highest":"#e2e3df","on-error":"#ffffff",
+        "on-surface":"#1a1c1a","surface-bright":"#faf9f6","on-secondary":"#ffffff",
+        "on-primary-container":"#00391a","tertiary":"#5c5f5e","secondary-fixed":"#ffdea0",
+        "surface-container":"#eeeeea","tertiary-container":"#969997","surface":"#faf9f6",
+        "on-secondary-fixed-variant":"#5c4300","inverse-surface":"#2f312f",
+        "surface-container-high":"#e8e8e5","error":"#ba1a1a","surface-tint":"#006d37",
+        "on-primary":"#ffffff","outline-variant":"#bccabc","on-tertiary-fixed-variant":"#444746",
+        "on-secondary-fixed":"#261900","tertiary-fixed-dim":"#c5c7c5","outline":"#6d7a6e",
+        "on-tertiary":"#ffffff","surface-variant":"#e2e3df","on-surface-variant":"#3d4a3f",
+        "inverse-on-surface":"#f1f1ed","background":"#faf9f6","secondary":"#795900",
+        "primary-container":"#27ae60","surface-container-low":"#f4f4f0","on-background":"#1a1c1a",
+        "secondary-container":"#fcc340","surface-container-lowest":"#ffffff",
+        "primary-fixed-dim":"#61de8a","secondary-fixed-dim":"#f6be3b",
+        "on-secondary-container":"#6f5100","tertiary-fixed":"#e1e3e1",
+        "on-tertiary-container":"#2e3130","primary-fixed":"#7efba4",
+        "error-container":"#ffdad6","on-error-container":"#93000a",
+        "primary":"#006d37","on-primary-fixed-variant":"#005228"
+      },
+      borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
+      spacing:{"container-margin":"16px","unit":"4px","gutter":"12px","section-padding":"24px","stack-gap":"12px"},
+      fontFamily:{"headline-md":["Epilogue"],"title-sm":["Plus Jakarta Sans"],"display-lg":["Epilogue"],"body-md":["Plus Jakarta Sans"],"label-caps":["Plus Jakarta Sans"]},
+      fontSize:{
+        "headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],
+        "title-sm":["18px",{"lineHeight":"24px","fontWeight":"600"}],
+        "display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],
+        "body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],
+        "label-caps":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"700"}]
+      }
+    }
+  }
+}
+</script>
+<style>
+body { min-height: max(884px, 100dvh); font-family: 'Plus Jakarta Sans', sans-serif; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.atlas-pattern { background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30L15 30z' fill='%23DAA520' fill-opacity='0.04'/%3E%3C/svg%3E"); }
+.decorative-strip { height: 4px; background: linear-gradient(90deg,#006d37 0%,#fcc340 50%,#006d37 100%); opacity: 0.8; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.screen { display: none; min-height: 100dvh; flex-direction: column; }
+.screen.active { display: flex; }
+.nav-tab.active .nav-icon { background-color: #fcc340; border-radius: 9999px; }
+.nav-tab.active .nav-label, .nav-tab.active .material-symbols-outlined { color: #6f5100; }
+#map-box { position: relative; z-index: 0; }
+#map-box .leaflet-pane,
+#map-box .leaflet-control { z-index: 1 !important; }
+#checkout-footer { z-index: 1000; }
+body.checkout-typing #checkout-summary-box { display: none; }
+body.checkout-typing #checkout-footer { padding-top: 8px; padding-bottom: 10px; }
+body.checkout-typing #s-checkout main { padding-bottom: 96px; }
+</style>
+</head>
+<body class="bg-background text-on-background atlas-pattern">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: MENU                                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-menu" class="screen active">
+  <div class="decorative-strip fixed top-0 left-0 w-full z-[60]"></div>
+  <header class="fixed top-1 w-full z-50 bg-surface/90 backdrop-blur-md shadow-[0_4px_12px_rgba(218,165,32,0.08)] flex justify-between items-center px-container-margin h-14">
+    <div class="flex items-center gap-2">
+      <img src="assets/brand-mark.png" alt="Osh Kafe" class="w-9 h-9 rounded-full object-cover bg-surface-container-lowest border border-primary/10"/>
+      <h1 class="font-headline-md text-headline-md text-primary">Osh Kafe</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex items-center bg-surface-container-high rounded-full p-0.5 gap-0.5">
+        <button data-lang="uz" onclick="setLang('uz')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">UZ</button>
+        <button data-lang="ru" onclick="setLang('ru')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">RU</button>
+      </div>
+      <button id="hist-btn" onclick="goTo('s-orders')" class="hidden flex items-center justify-center w-9 h-9 rounded-full bg-surface-container-high text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+      </button>
+      <button onclick="goTo('s-cart')" class="relative flex items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 shadow-[0_2px_8px_rgba(252,195,64,0.3)]">
+        <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+        <span id="cart-count" class="hidden ml-1 font-label-caps text-label-caps">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="pt-14 pb-36 flex-1 overflow-y-auto">
+    <section class="relative h-52 w-full overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-t from-on-primary-fixed/80 to-transparent z-10"></div>
+      <img class="absolute inset-0 w-full h-full object-cover object-center" src="assets/osh-hero.png" alt="Osh Kafe"/>
+      <div class="absolute bottom-5 left-container-margin z-20 text-surface">
+        <h2 class="font-display-lg text-display-lg mb-0.5">Osh Kafe</h2>
+        <p class="font-title-sm text-sm opacity-90" data-i18n="tagline"></p>
+      </div>
+    </section>
+
+    <div id="category-tabs" class="sticky top-14 z-40 bg-surface/95 backdrop-blur-sm border-b border-outline-variant/30 py-3 px-container-margin flex gap-3 overflow-x-auto no-scrollbar"></div>
+
+    <div id="menu-body" class="px-container-margin mt-4 flex flex-col gap-3"></div>
+  </main>
+
+  <div id="cart-bar" class="hidden fixed bottom-20 left-container-margin right-container-margin z-50">
+    <button onclick="goTo('s-cart')" class="w-full bg-primary text-on-primary h-14 rounded-xl flex items-center justify-between px-5 shadow-[0_8px_24px_rgba(0,109,55,0.3)] active:scale-[0.98] transition-transform">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined">shopping_basket</span>
+        <span id="cbar-count" class="font-semibold text-sm">0</span>
+      </div>
+      <span id="cbar-total" class="font-headline-md text-[18px]">0 so'm</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: CART                                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-cart" class="screen">
+  <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md shadow-[0_4px_12px_rgba(218,165,32,0.08)] flex justify-between items-center px-container-margin h-16">
+    <div class="flex items-center gap-3">
+      <button onclick="goTo('s-menu')" class="text-on-surface-variant active:scale-90 transition-transform">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h1 class="font-headline-md text-headline-md text-primary" data-i18n="your_order"></h1>
+    </div>
+    <div class="flex items-center bg-surface-container-high rounded-full p-0.5 gap-0.5">
+      <button data-lang="uz" onclick="setLang('uz')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">UZ</button>
+      <button data-lang="ru" onclick="setLang('ru')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">RU</button>
+    </div>
+  </header>
+
+  <main class="pt-20 pb-56 px-container-margin flex-1 overflow-y-auto flex flex-col gap-4">
+    <div id="cart-items" class="flex flex-col gap-3"></div>
+    <div id="cart-summary" class="hidden">
+      <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/20 shadow-[0_8px_24px_rgba(218,165,32,0.06)]">
+        <div class="flex flex-col gap-3">
+          <div class="flex justify-between items-center text-on-surface-variant">
+            <span data-i18n="subtotal"></span><span id="sum-subtotal" class="font-semibold text-on-surface">0 so'm</span>
+          </div>
+          <div class="flex justify-between items-center text-on-surface-variant">
+            <span data-i18n="delivery_fee"></span><span class="font-semibold text-on-surface">15 000 so'm</span>
+          </div>
+          <div class="h-px bg-outline-variant/40 my-1"></div>
+          <div class="flex justify-between items-center">
+            <span class="font-headline-md text-headline-md text-on-surface" data-i18n="total"></span>
+            <span id="sum-total" class="font-headline-md text-headline-md text-primary">0 so'm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="fixed bottom-[72px] w-full z-40 bg-surface rounded-t-xl shadow-[0_-4px_16px_rgba(218,165,32,0.1)] px-container-margin pt-4 pb-4">
+    <button id="to-checkout-btn" onclick="goTo('s-checkout')" disabled class="w-full h-14 bg-primary text-on-primary rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform disabled:opacity-40 disabled:cursor-default">
+      <span data-i18n="proceed_checkout"></span>
+      <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: CHECKOUT                                    -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-checkout" class="screen">
+  <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md shadow-[0_4px_12px_rgba(218,165,32,0.08)] flex justify-between items-center px-container-margin h-16">
+    <div class="flex items-center gap-3">
+      <button onclick="goTo('s-cart')" class="text-on-surface-variant active:scale-90 transition-transform">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h1 class="font-headline-md text-headline-md text-primary" data-i18n="checkout_title"></h1>
+    </div>
+    <div class="flex items-center bg-surface-container-high rounded-full p-0.5 gap-0.5">
+      <button data-lang="uz" onclick="setLang('uz')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">UZ</button>
+      <button data-lang="ru" onclick="setLang('ru')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">RU</button>
+    </div>
+  </header>
+
+  <main class="pt-20 pb-56 px-container-margin flex-1 overflow-y-auto flex flex-col gap-6">
+    <section class="flex flex-col gap-3">
+      <h2 class="font-semibold text-on-surface text-[18px]" data-i18n="contact_section"></h2>
+      <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_16px_rgba(218,165,32,0.05)] border border-outline-variant/30 flex flex-col gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_name"></label>
+          <input id="f-name" type="text" data-i18n-ph="ph_name" class="w-full bg-surface-container-low border-none rounded-lg font-body-md text-body-md py-3 px-3 focus:ring-2 focus:ring-secondary-container transition-all outline-none"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_phone"></label>
+          <div class="flex gap-2">
+            <input id="f-phone" type="tel" placeholder="+998 90 123 45 67" class="flex-1 bg-surface-container-low border-none rounded-lg font-body-md text-body-md py-3 px-3 focus:ring-2 focus:ring-secondary-container transition-all outline-none"/>
+            <button id="auto-fill-btn" onclick="shareContact()" class="bg-secondary-container text-on-secondary-container font-label-caps text-label-caps px-3 rounded-lg flex items-center gap-1.5 active:scale-95 transition-transform whitespace-nowrap">
+              <span class="material-symbols-outlined text-[18px]">contact_phone</span>
+              <span data-i18n="auto_fill"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="flex flex-col gap-3">
+      <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-on-surface text-[18px]" data-i18n="delivery_section"></h2>
+        <button id="loc-btn" onclick="getLocation()" class="flex items-center gap-1.5 text-primary active:opacity-70 transition-opacity">
+          <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1;">location_on</span>
+          <span id="loc-text" class="font-label-caps text-label-caps" data-i18n="use_location"></span>
+        </button>
+      </div>
+
+      <div class="bg-surface-container-lowest overflow-hidden rounded-xl shadow-[0_4px_16px_rgba(218,165,32,0.05)] border border-outline-variant/30">
+        <div id="map-box" style="display:none;height:160px;width:100%"></div>
+        <div class="p-4 flex flex-col gap-3">
+          <p id="loc-hint" class="text-xs text-on-surface-variant hidden"></p>
+          <div id="addr-fields" class="hidden flex-col gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_street"></label>
+              <input id="f-addr" type="text" data-i18n-ph="ph_street" class="w-full bg-surface-container-low border-none rounded-lg py-3 px-3 text-sm focus:ring-2 focus:ring-secondary-container outline-none"/>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_city"></label>
+                <input id="f-city" type="text" data-i18n-ph="ph_city" class="w-full bg-surface-container-low border-none rounded-lg py-3 px-3 text-sm focus:ring-2 focus:ring-secondary-container outline-none"/>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_apt"></label>
+                <input id="f-apt" type="text" data-i18n-ph="ph_apt" class="w-full bg-surface-container-low border-none rounded-lg py-3 px-3 text-sm focus:ring-2 focus:ring-secondary-container outline-none"/>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_notes"></label>
+            <textarea id="f-notes" data-i18n-ph="ph_notes" rows="2" class="w-full bg-surface-container-low border-none rounded-lg py-3 px-3 text-sm focus:ring-2 focus:ring-secondary-container outline-none resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <input type="hidden" id="f-zip">
+    <input type="hidden" id="f-lat">
+    <input type="hidden" id="f-lon">
+  </main>
+
+  <footer id="checkout-footer" class="fixed bottom-0 w-full bg-surface rounded-t-xl shadow-[0_-4px_16px_rgba(218,165,32,0.1)] px-container-margin pt-3 pb-4 flex flex-col gap-2">
+    <div id="checkout-summary-box" class="bg-surface-container-low px-4 py-3 rounded-lg flex flex-col gap-1.5">
+      <div class="flex justify-between items-center text-sm text-on-surface-variant">
+        <span id="checkout-items-count"></span>
+        <span id="checkout-subtotal">0 so'm</span>
+      </div>
+      <div class="flex justify-between items-center text-sm text-on-surface-variant">
+        <span data-i18n="delivery_fee"></span><span>15 000 so'm</span>
+      </div>
+      <div class="h-px bg-outline-variant/20"></div>
+      <div class="flex justify-between items-center">
+        <span class="font-semibold text-on-surface" data-i18n="total"></span>
+        <span id="checkout-total" class="text-[26px] leading-8 font-bold text-primary">0 so'm</span>
+      </div>
+    </div>
+    <button id="place-btn" onclick="placeOrder()" class="w-full h-14 bg-primary text-on-primary rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">
+      <span data-i18n="place_order"></span>
+      <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: MY ORDERS                                   -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-orders" class="screen">
+  <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md shadow-[0_4px_12px_rgba(218,165,32,0.08)] flex justify-between items-center px-container-margin h-16">
+    <div class="flex items-center gap-3">
+      <button onclick="goTo('s-menu')" class="text-on-surface-variant active:scale-90 transition-transform">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h1 class="font-headline-md text-headline-md text-primary" data-i18n="my_orders"></h1>
+    </div>
+    <div class="flex items-center bg-surface-container-high rounded-full p-0.5 gap-0.5">
+      <button data-lang="uz" onclick="setLang('uz')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">UZ</button>
+      <button data-lang="ru" onclick="setLang('ru')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">RU</button>
+    </div>
+  </header>
+  <main class="pt-20 pb-28 px-container-margin flex-1 overflow-y-auto">
+    <div id="hist-list" class="flex flex-col gap-3 mt-2"></div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: SUCCESS / TRACKING                          -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-success" class="screen">
+  <main class="flex-1 flex flex-col items-center justify-start pt-20 pb-28 px-container-margin overflow-y-auto">
+    <div class="w-full max-w-sm flex flex-col items-center gap-6 mt-6">
+      <div class="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary text-[52px]" style="font-variation-settings:'FILL' 1;">check_circle</span>
+      </div>
+      <div class="text-center">
+        <h2 class="font-display-lg text-display-lg text-on-surface mb-2" data-i18n="order_placed_title"></h2>
+        <p id="success-msg" class="text-on-surface-variant text-sm" data-i18n="order_placed_msg"></p>
+      </div>
+      <div class="bg-secondary-container text-on-secondary-container font-semibold px-6 py-2.5 rounded-full shadow-[0_2px_8px_rgba(252,195,64,0.3)]">
+        <span id="success-order-num">#0000</span>
+      </div>
+      <div class="w-full bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-5 shadow-[0_4px_16px_rgba(218,165,32,0.06)]">
+        <p class="font-label-caps text-label-caps text-on-surface-variant mb-4" data-i18n="order_status_label"></p>
+        <div class="flex flex-col gap-0">
+          <div class="flex items-center gap-3 py-2.5">
+            <div id="dot-pending" class="w-3 h-3 rounded-full bg-primary flex-shrink-0"></div>
+            <p id="lbl-pending" class="font-semibold text-on-surface text-sm" data-i18n="step_pending"></p>
+          </div>
+          <div class="ml-[5px] w-0.5 h-4 bg-outline-variant/50"></div>
+          <div class="flex items-center gap-3 py-2.5">
+            <div id="dot-confirmed" class="w-3 h-3 rounded-full bg-outline-variant flex-shrink-0"></div>
+            <p id="lbl-confirmed" class="text-on-surface-variant text-sm" data-i18n="step_confirmed"></p>
+          </div>
+          <div class="ml-[5px] w-0.5 h-4 bg-outline-variant/50"></div>
+          <div class="flex items-center gap-3 py-2.5">
+            <div id="dot-preparing" class="w-3 h-3 rounded-full bg-outline-variant flex-shrink-0"></div>
+            <p id="lbl-preparing" class="text-on-surface-variant text-sm" data-i18n="step_preparing"></p>
+          </div>
+          <div class="ml-[5px] w-0.5 h-4 bg-outline-variant/50"></div>
+          <div class="flex items-center gap-3 py-2.5">
+            <div id="dot-out_for_delivery" class="w-3 h-3 rounded-full bg-outline-variant flex-shrink-0"></div>
+            <p id="lbl-out_for_delivery" class="text-on-surface-variant text-sm" data-i18n="step_out"></p>
+          </div>
+          <div class="ml-[5px] w-0.5 h-4 bg-outline-variant/50"></div>
+          <div class="flex items-center gap-3 py-2.5">
+            <div id="dot-delivered" class="w-3 h-3 rounded-full bg-outline-variant flex-shrink-0"></div>
+            <p id="lbl-delivered" class="text-on-surface-variant text-sm" data-i18n="step_delivered"></p>
+          </div>
+        </div>
+      </div>
+      <button onclick="newOrder()" class="w-full h-14 bg-primary text-on-primary rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span data-i18n="order_again"></span>
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav id="bottom-nav" class="fixed bottom-0 w-full z-50 bg-surface rounded-t-xl shadow-[0_-4px_16px_rgba(218,165,32,0.1)] flex justify-around items-center h-[72px] px-2">
+  <button id="nav-menu" class="nav-tab active flex flex-col items-center justify-center gap-0.5 px-4 py-1" onclick="goTo('s-menu')">
+    <div class="nav-icon w-14 h-8 flex items-center justify-center">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">menu_book</span>
+    </div>
+    <span class="nav-label font-label-caps text-label-caps text-on-surface-variant" data-i18n="nav_menu"></span>
+  </button>
+  <button id="nav-cart" class="nav-tab flex flex-col items-center justify-center gap-0.5 px-4 py-1" onclick="goTo('s-cart')">
+    <div class="nav-icon w-14 h-8 flex items-center justify-center">
+      <span class="material-symbols-outlined">shopping_cart</span>
+    </div>
+    <span class="nav-label font-label-caps text-label-caps text-on-surface-variant" data-i18n="nav_cart"></span>
+  </button>
+  <button id="nav-orders" class="nav-tab flex flex-col items-center justify-center gap-0.5 px-4 py-1" onclick="goTo('s-orders')">
+    <div class="nav-icon w-14 h-8 flex items-center justify-center">
+      <span class="material-symbols-outlined">receipt_long</span>
+    </div>
+    <span class="nav-label font-label-caps text-label-caps text-on-surface-variant" data-i18n="nav_orders"></span>
+  </button>
+</nav>
+
+<script>
+const API = window.location.origin;
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
+
+let MENU = [], CATEGORIES = [], cart = {}, currentCat = 'food', pollInterval = null;
+const DELIVERY_FEE = 15000;
+let leafletMap = null, leafletMarker = null;
+const DEFAULT_CATEGORIES = [
+  {key:'food', label_uz:'Taomlar', label_ru:'Еда', sort_order:10},
+  {key:'salads', label_uz:'Salatlar', label_ru:'Салаты', sort_order:20},
+  {key:'drinks', label_uz:'Ichimliklar', label_ru:'Напитки', sort_order:30},
+  {key:'desserts', label_uz:'Shirinliklar', label_ru:'Десерты', sort_order:1000}
+];
+
+// ── Translations ──────────────────────────────────────────
+const T = {
+  uz: {
+    tagline: "An'anaviy O'zbek Ta'mlari · Tez Yetkazib Berish",
+    cat_all: "Barchasi", cat_coffee: "Qahva", cat_drinks: "Ichimliklar",
+    cat_food: "Taomlar", cat_salads: "Salatlar", cat_desserts: "Shirinliklar",
+    cat_label_coffee: "☕ Qahva", cat_label_drinks: "🧃 Ichimliklar",
+    cat_label_food: "🍽 Taomlar", cat_label_desserts: "🍰 Shirinliklar",
+    add_to_cart: "Savatga", badge_new: "Yangi", badge_hot: "Mashhur",
+    your_order: "Buyurtmangiz", proceed_checkout: "Rasmiylashtirish",
+    checkout_title: "To'lov",
+    contact_section: "Kontakt ma'lumotlar",
+    label_name: "TO'LIQ ISM", ph_name: "Ismingiz",
+    label_phone: "TELEFON RAQAM",
+    auto_fill: "AVTOMATIK", auto_filled: "TO'LDIRILDI",
+    delivery_section: "Yetkazib berish manzili",
+    use_location: "JOYLASHUVIMNI ANIQLASH",
+    getting_location: "Aniqlanmoqda…",
+    improving: (n) => `Yaxshilanmoqda… ±${n}m`,
+    set_label: (n) => `✓ Aniqlangan (±${n}m)`,
+    gps_error: "GPS mavjud emas — manzilni qo'lda kiriting.",
+    label_street: "KO'CHA VA UY", ph_street: "Ko'cha manzili",
+    label_city: "SHAHAR", ph_city: "Shahar",
+    label_apt: "KIRISH / XONADON", ph_apt: "4B xonadon",
+    label_notes: "KURYER UCHUN IZOH (IXTIYORIY)",
+    ph_notes: "Eshik oldiga qo'ying, kelganda qo'ng'iroq qiling…",
+    place_order: "Buyurtma berish", placing_order: "Buyurtma berilmoqda…",
+    subtotal: "Jami", delivery_fee: "Yetkazish", total: "Umumiy",
+    items_count: (n) => `Mahsulotlar (${n})`,
+    cart_items: (n) => `${n} ta mahsulot`,
+    each_label: "ta narxi",
+    cart_empty: "Savat bo'sh", cart_empty_sub: "Ortga qayting va mahsulot qo'shing!",
+    my_orders: "Buyurtmalarim",
+    no_orders: "Hali buyurtmalar yo'q",
+    no_orders_sub: "Birinchi buyurtmangizdan keyin tarix bu yerda ko'rinadi",
+    order_placed_title: "Buyurtma berildi!",
+    order_placed_msg: "Buyurtmangiz qabul qilindi va tez orada tayyorlashni boshlaymiz.",
+    order_status_label: "BUYURTMA HOLATI",
+    step_pending: "Buyurtma qabul qilindi",
+    step_confirmed: "Kafe tomonidan tasdiqlandi",
+    step_preparing: "Tayyorlanmoqda",
+    step_out: "Yetkazib berilmoqda 🛵",
+    step_delivered: "Yetkazildi 🎊",
+    order_again: "Qayta buyurtma",
+    nav_menu: "Menyu", nav_cart: "Savat", nav_orders: "Buyurtmalar",
+    removed_cafe: "Kafe tomonidan o'chirildi",
+    order_removed_title: "Buyurtma o'chirildi",
+    order_removed_msg: "Bu buyurtma kafe tomonidan olib tashlandi.",
+    status_pending: "Kutilmoqda", status_confirmed: "Tasdiqlangan",
+    status_preparing: "Tayyorlanmoqda", status_out_for_delivery: "Yo'lda 🛵",
+    status_delivered: "Yetkazildi ✓", status_cancelled: "Bekor qilindi",
+    status_deleted: "O'chirildi",
+    alert_name_phone: "Ism va telefon raqamingizni kiriting.",
+    alert_address: "Joylashuvingizni ulashing yoki manzilni qo'lda kiriting.",
+    order_error: "Buyurtmani joylash imkonsiz: ",
+    autofill_error: "Avtomatik to'ldirish uchun Telegramda oching.",
+  },
+  ru: {
+    tagline: "Традиционная Узбекская Кухня · Быстрая Доставка",
+    cat_all: "Все", cat_coffee: "Кофе", cat_drinks: "Напитки",
+    cat_food: "Еда", cat_salads: "Салаты", cat_desserts: "Десерты",
+    cat_label_coffee: "☕ Кофе", cat_label_drinks: "🧃 Напитки",
+    cat_label_food: "🍽 Еда", cat_label_desserts: "🍰 Десерты",
+    add_to_cart: "В корзину", badge_new: "Новинка", badge_hot: "Популярное",
+    your_order: "Ваш заказ", proceed_checkout: "Оформить заказ",
+    checkout_title: "Оформление",
+    contact_section: "Ваши контакты",
+    label_name: "ПОЛНОЕ ИМЯ", ph_name: "Ваше имя",
+    label_phone: "НОМЕР ТЕЛЕФОНА",
+    auto_fill: "АВТО", auto_filled: "ЗАПОЛНЕНО",
+    delivery_section: "Адрес доставки",
+    use_location: "МОЁ МЕСТОПОЛОЖЕНИЕ",
+    getting_location: "Определяем…",
+    improving: (n) => `Уточняем… ±${n}м`,
+    set_label: (n) => `✓ Найдено (±${n}м)`,
+    gps_error: "GPS недоступен — введите адрес вручную.",
+    label_street: "УЛИЦА И ДОМ", ph_street: "Адрес улицы",
+    label_city: "ГОРОД", ph_city: "Город",
+    label_apt: "ПОДЪЕЗД / КВ", ph_apt: "Кв. 4Б",
+    label_notes: "ЗАМЕТКИ ДЛЯ КУРЬЕРА (НЕО.)",
+    ph_notes: "Оставить у двери, позвонить при прибытии…",
+    place_order: "Оформить заказ", placing_order: "Оформляем заказ…",
+    subtotal: "Подитог", delivery_fee: "Доставка", total: "Итого",
+    items_count: (n) => `Позиции (${n})`,
+    cart_items: (n) => `${n} позиц.`,
+    each_label: "за шт.",
+    cart_empty: "Корзина пуста", cart_empty_sub: "Вернитесь и добавьте товары!",
+    my_orders: "Мои заказы",
+    no_orders: "Заказов пока нет",
+    no_orders_sub: "История появится после первого заказа",
+    order_placed_title: "Заказ оформлен!",
+    order_placed_msg: "Мы получили ваш заказ и скоро начнём его готовить.",
+    order_status_label: "СТАТУС ЗАКАЗА",
+    step_pending: "Заказ получен",
+    step_confirmed: "Подтверждён кафе",
+    step_preparing: "Готовится",
+    step_out: "В пути 🛵",
+    step_delivered: "Доставлен 🎊",
+    order_again: "Заказать снова",
+    nav_menu: "Меню", nav_cart: "Корзина", nav_orders: "Заказы",
+    removed_cafe: "Удалено кафе",
+    order_removed_title: "Заказ удалён",
+    order_removed_msg: "Этот заказ был удалён кафе.",
+    status_pending: "Ожидает", status_confirmed: "Подтверждён",
+    status_preparing: "Готовится", status_out_for_delivery: "В пути 🛵",
+    status_delivered: "Доставлен ✓", status_cancelled: "Отменён",
+    status_deleted: "Удалён",
+    alert_name_phone: "Пожалуйста, введите ваше имя и номер телефона.",
+    alert_address: "Поделитесь геолокацией или введите адрес вручную.",
+    order_error: "Не удалось оформить заказ: ",
+    autofill_error: "Откройте приложение в Telegram для автозаполнения.",
+  }
+};
+
+let lang = localStorage.getItem('oshLang') || 'uz';
+
+function t(key) {
+  return T[lang][key] !== undefined ? T[lang][key] : key;
+}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('oshLang', l);
+  applyTranslations();
+  updateLangBtns();
+  const active = document.querySelector('.screen.active');
+  if (active) {
+    if (active.id === 's-menu') { renderCategoryTabs(); renderMenu(); }
+    if (active.id === 's-cart') renderCart();
+    if (active.id === 's-checkout') renderCheckoutSummary();
+    if (active.id === 's-orders') renderOrderHistory();
+  }
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = T[lang][el.dataset.i18n];
+    if (typeof v === 'string') el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = T[lang][el.dataset.i18nPh];
+    if (typeof v === 'string') el.placeholder = v;
+  });
+}
+
+function updateLangBtns() {
+  document.querySelectorAll('[data-lang]').forEach(b => {
+    const active = b.dataset.lang === lang;
+    b.style.background = active ? '#006d37' : 'transparent';
+    b.style.color = active ? '#ffffff' : '#3d4a3f';
+  });
+}
+
+// ── Menu ──────────────────────────────────────────────────
+async function loadMenu() {
+  document.getElementById('menu-body').innerHTML =
+    `<div class="text-center py-12 text-on-surface-variant">${t('cat_all')}…</div>`;
+  try {
+    const menuRes = await fetch(API + '/api/menu');
+    MENU = await menuRes.json();
+    try {
+      const catRes = await fetch(API + '/api/categories');
+      if (!catRes.ok) throw new Error('Categories unavailable');
+      CATEGORIES = await catRes.json();
+    } catch(e) {
+      CATEGORIES = deriveCategories(MENU);
+    }
+    if (!CATEGORIES.some(c => c.key === currentCat)) {
+      currentCat = CATEGORIES[0]?.key || 'food';
+    }
+    renderCategoryTabs();
+    renderMenu();
+  } catch(e) {
+    document.getElementById('menu-body').innerHTML =
+      '<div class="text-center py-12 text-on-surface-variant text-sm">Menyu yuklanmadi. Qayta urining.</div>';
+  }
+}
+
+function fmt(n) {
+  return `${Math.round(Number(n) || 0).toLocaleString('ru-RU')} so'm`;
+}
+
+function formatUzDateTime(value = new Date()) {
+  const dt = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(dt.getTime())) return value || '';
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(dt.getDate())}.${pad(dt.getMonth() + 1)}.${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+}
+
+function deriveCategories(items) {
+  const seen = new Set(items.map(i => i.category));
+  const defaults = DEFAULT_CATEGORIES.filter(c => seen.has(c.key) || ['food','salads','drinks','desserts'].includes(c.key));
+  const extras = [...seen]
+    .filter(key => !defaults.some(c => c.key === key))
+    .map((key, i) => ({key, label_uz:key, label_ru:key, sort_order:100 + i}));
+  return [...defaults, ...extras].sort((a, b) => a.sort_order - b.sort_order);
+}
+
+function categoryLabel(cat) {
+  const found = CATEGORIES.find(c => c.key === cat);
+  if (found) return lang === 'ru' ? (found.label_ru || found.label_uz) : found.label_uz;
+  const translated = t('cat_' + cat);
+  return translated === 'cat_' + cat ? cat : translated;
+}
+
+function categoryHeading(cat) {
+  const icon = { food: '🍽', salads: '🥗', drinks: '🧃', desserts: '🍰' }[cat] || '🍽';
+  return `${icon} ${categoryLabel(cat)}`;
+}
+
+function renderCategoryTabs() {
+  const tabs = document.getElementById('category-tabs');
+  tabs.innerHTML = CATEGORIES.map(cat => {
+    const active = cat.key === currentCat;
+    const cls = active
+      ? 'cat-tab flex-none bg-primary text-on-primary font-label-caps text-label-caps px-5 py-2 rounded-full shadow-md'
+      : 'cat-tab flex-none bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps px-5 py-2 rounded-full';
+    return `<button class="${cls}" onclick="filterCat('${cat.key}',this)">${categoryLabel(cat.key)}</button>`;
+  }).join('');
+}
+
+function renderMenu() {
+  const items = currentCat === 'all' ? MENU : MENU.filter(i => i.category === currentCat);
+  let html = '', lastCat = null;
+
+  items.forEach(item => {
+    if (currentCat === 'all' && item.category !== lastCat) {
+      html += `<p class="font-label-caps text-label-caps text-on-surface-variant uppercase pt-4 pb-1">${categoryHeading(item.category)}</p>`;
+      lastCat = item.category;
+    }
+    const qty = cart[item.id] || 0;
+    const badge = item.badge === 'new'
+      ? `<span class="absolute top-2 left-2 bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">${t('badge_new')}</span>`
+      : item.badge === 'hot'
+      ? `<span class="absolute top-2 left-2 bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">${t('badge_hot')}</span>`
+      : '';
+    const img = item.photo
+      ? `<img class="w-full h-full object-cover" src="${item.photo}" alt="${item.name}">`
+      : `<div class="w-full h-full flex items-center justify-center text-4xl bg-surface-container">${item.emoji}</div>`;
+    const ctrl = qty === 0
+      ? `<button onclick="add(${item.id})" class="bg-primary text-on-primary font-label-caps text-label-caps px-4 py-2 rounded-full shadow-md active:scale-95 transition-transform text-xs">${t('add_to_cart')}</button>`
+      : `<div class="flex items-center bg-surface-container-high rounded-full p-1 gap-1">
+           <button onclick="dec(${item.id})" class="w-7 h-7 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm active:scale-90"><span class="material-symbols-outlined text-[16px]">remove</span></button>
+           <span class="font-semibold text-sm px-2">${qty}</span>
+           <button onclick="add(${item.id})" class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-sm active:scale-90"><span class="material-symbols-outlined text-[16px]">add</span></button>
+         </div>`;
+
+    html += `
+    <div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_16px_rgba(218,165,32,0.06)] overflow-hidden flex gap-3 border border-outline-variant/20 p-3">
+      <div class="relative w-24 h-24 flex-none rounded-lg overflow-hidden border border-secondary/10 flex-shrink-0">${img}${badge}</div>
+      <div class="flex-grow flex flex-col justify-between min-w-0">
+        <div>
+          <div class="flex justify-between items-start gap-2">
+            <h3 class="font-semibold text-on-surface text-sm leading-tight">${item.name}</h3>
+            <span class="font-semibold text-primary text-sm whitespace-nowrap">${fmt(item.price)}</span>
+          </div>
+          <p class="text-on-surface-variant text-xs mt-1 line-clamp-2 leading-relaxed">${item.description||''}</p>
+        </div>
+        <div class="flex justify-end mt-2" id="ctrl-${item.id}">${ctrl}</div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('menu-body').innerHTML = html ||
+    `<div class="text-center py-12 text-on-surface-variant text-sm">${categoryLabel(currentCat)} — 0</div>`;
+}
+
+function updateCartBar() {
+  let count = 0, total = 0;
+  Object.keys(cart).forEach(id => {
+    const item = MENU.find(m => m.id == id); if (!item) return;
+    count += cart[id]; total += item.price * cart[id];
+  });
+  const bar = document.getElementById('cart-bar');
+  const badge = document.getElementById('cart-count');
+  if (count > 0) {
+    bar.classList.remove('hidden');
+    document.getElementById('cbar-count').textContent = t('cart_items')(count);
+    document.getElementById('cbar-total').textContent = fmt(total);
+    badge.classList.remove('hidden'); badge.textContent = count;
+  } else {
+    bar.classList.add('hidden'); badge.classList.add('hidden');
+  }
+}
+
+function updateCtrl(id) {
+  const el = document.getElementById('ctrl-' + id); if (!el) return;
+  const qty = cart[id] || 0;
+  el.innerHTML = qty === 0
+    ? `<button onclick="add(${id})" class="bg-primary text-on-primary font-label-caps text-label-caps px-4 py-2 rounded-full shadow-md active:scale-95 transition-transform text-xs">${t('add_to_cart')}</button>`
+    : `<div class="flex items-center bg-surface-container-high rounded-full p-1 gap-1">
+         <button onclick="dec(${id})" class="w-7 h-7 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm active:scale-90"><span class="material-symbols-outlined text-[16px]">remove</span></button>
+         <span class="font-semibold text-sm px-2">${qty}</span>
+         <button onclick="add(${id})" class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-sm active:scale-90"><span class="material-symbols-outlined text-[16px]">add</span></button>
+       </div>`;
+}
+
+function add(id) { cart[id] = (cart[id]||0)+1; updateCtrl(id); updateCartBar(); }
+function dec(id) { if(cart[id]>1) cart[id]--; else delete cart[id]; updateCtrl(id); updateCartBar(); }
+
+function filterCat(cat, el) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => {
+    t.className = 'cat-tab flex-none bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps px-5 py-2 rounded-full';
+  });
+  el.className = 'cat-tab flex-none bg-primary text-on-primary font-label-caps text-label-caps px-5 py-2 rounded-full shadow-md';
+  renderMenu();
+}
+
+// ── Cart ──────────────────────────────────────────────────
+function renderCart() {
+  const keys = Object.keys(cart);
+  const listEl = document.getElementById('cart-items');
+  const btn = document.getElementById('to-checkout-btn');
+  const sumEl = document.getElementById('cart-summary');
+
+  if (keys.length === 0) {
+    listEl.innerHTML = `<div class="flex flex-col items-center justify-center py-24 gap-4 text-on-surface-variant">
+      <span class="material-symbols-outlined text-6xl opacity-40">shopping_cart</span>
+      <p class="font-semibold">${t('cart_empty')}</p>
+      <p class="text-sm">${t('cart_empty_sub')}</p></div>`;
+    btn.disabled = true; sumEl.classList.add('hidden'); return;
+  }
+
+  let sub = 0, html = '';
+  keys.forEach(id => {
+    const item = MENU.find(m => m.id == id); if (!item) return;
+    const qty = cart[id]; sub += item.price * qty;
+    const img = item.photo
+      ? `<img class="w-20 h-20 rounded-lg object-cover border border-secondary/20 flex-shrink-0" src="${item.photo}" alt="${item.name}">`
+      : `<div class="w-20 h-20 rounded-lg flex items-center justify-center text-4xl bg-surface-container border border-secondary/20 flex-shrink-0">${item.emoji}</div>`;
+    html += `
+    <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_16px_rgba(218,165,32,0.05)] border border-outline-variant/30 flex items-center gap-4">
+      ${img}
+      <div class="flex-grow min-w-0">
+        <div class="flex justify-between items-start gap-2">
+          <h3 class="font-semibold text-on-surface text-sm">${item.name}</h3>
+          <span class="font-semibold text-primary text-sm whitespace-nowrap">${fmt(item.price*qty)}</span>
+        </div>
+        <p class="text-xs text-on-surface-variant mt-0.5 mb-3">${fmt(item.price)} ${t('each_label')}</p>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center bg-surface-container rounded-full p-1 border border-outline-variant/20">
+            <button onclick="decCart(${id})" class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-surface-container-high text-primary">
+              <span class="material-symbols-outlined text-[16px]">remove</span></button>
+            <span class="px-3 font-bold text-on-surface text-sm">${qty}</span>
+            <button onclick="addCart(${id})" class="w-7 h-7 flex items-center justify-center rounded-full bg-secondary-container text-on-secondary-container">
+              <span class="material-symbols-outlined text-[16px]">add</span></button>
+          </div>
+          <button onclick="removeFromCart(${id})" class="text-error opacity-60 hover:opacity-100 transition-opacity">
+            <span class="material-symbols-outlined text-[18px]">delete</span></button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  listEl.innerHTML = html;
+  document.getElementById('sum-subtotal').textContent = fmt(sub);
+  document.getElementById('sum-total').textContent = fmt(sub + DELIVERY_FEE);
+  btn.disabled = false; sumEl.classList.remove('hidden');
+}
+
+function addCart(id) { add(id); renderCart(); }
+function decCart(id) { dec(id); renderCart(); }
+function removeFromCart(id) { delete cart[id]; updateCtrl(id); updateCartBar(); renderCart(); }
+
+function renderCheckoutSummary() {
+  let sub = 0;
+  const count = Object.keys(cart).reduce((a,id) => {
+    const item = MENU.find(m=>m.id==id); if(item){sub+=item.price*cart[id];} return a+cart[id];
+  }, 0);
+  document.getElementById('checkout-items-count').textContent = t('items_count')(count);
+  document.getElementById('checkout-subtotal').textContent = fmt(sub);
+  document.getElementById('checkout-total').textContent = fmt(sub + DELIVERY_FEE);
+}
+
+// ── Telegram ──────────────────────────────────────────────
+function setupCheckoutFocusBehavior() {
+  document.querySelectorAll('#s-checkout input:not([type="hidden"]), #s-checkout textarea').forEach(el => {
+    el.addEventListener('focus', () => {
+      document.body.classList.add('checkout-typing');
+      setTimeout(() => el.scrollIntoView({block:'center', behavior:'smooth'}), 120);
+    });
+    el.addEventListener('blur', () => {
+      setTimeout(() => {
+        if (!document.querySelector('#s-checkout input:not([type="hidden"]):focus, #s-checkout textarea:focus')) {
+          document.body.classList.remove('checkout-typing');
+        }
+      }, 120);
+    });
+  });
+}
+
+if (tg) {
+  tg.onEvent('contactRequested', function(e) {
+    if (e.status === 'sent') {
+      pollTelegramContact();
+    }
+  });
+}
+
+function shareContact() {
+  if (tg && tg.requestContact) {
+    tg.requestContact();
+    pollTelegramContact();
+  }
+  else alert(t('autofill_error'));
+}
+
+async function pollTelegramContact() {
+  const userId = tg?.initDataUnsafe?.user?.id?.toString();
+  if (!userId) return;
+  for (let i = 0; i < 10; i++) {
+    try {
+      const r = await fetch(API + '/api/telegram/contact/' + encodeURIComponent(userId));
+      if (r.ok) {
+        const contact = await r.json();
+        const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ');
+        if (name) document.getElementById('f-name').value = name;
+        if (contact.phone_number) {
+          document.getElementById('f-phone').value = contact.phone_number.startsWith('+')
+            ? contact.phone_number
+            : '+' + contact.phone_number;
+          const btn = document.getElementById('auto-fill-btn');
+          btn.querySelector('[data-i18n]').textContent = t('auto_filled');
+          return;
+        }
+      }
+    } catch(e) {}
+    await new Promise(resolve => setTimeout(resolve, 900));
+  }
+}
+
+function prefillFromTelegram() {
+  const user = tg?.initDataUnsafe?.user;
+  if (!user) return;
+  const f = document.getElementById('f-name');
+  if (!f.value) f.value = [user.first_name, user.last_name].filter(Boolean).join(' ');
+}
+
+// ── GPS ───────────────────────────────────────────────────
+async function getLocation() {
+  const locText = document.getElementById('loc-text');
+  const hint = document.getElementById('loc-hint');
+  const addrFields = document.getElementById('addr-fields');
+
+  if (!navigator.geolocation) {
+    addrFields.style.display = 'flex'; hint.classList.remove('hidden');
+    hint.textContent = t('gps_error'); return;
+  }
+
+  locText.textContent = t('getting_location');
+  hint.classList.add('hidden');
+
+  let bestPos = null, watchId = null;
+
+  const applyPosition = async (pos) => {
+    const { latitude, longitude, accuracy } = pos.coords;
+    document.getElementById('f-lat').value = latitude;
+    document.getElementById('f-lon').value = longitude;
+
+    const mapBox = document.getElementById('map-box');
+    mapBox.style.display = 'block';
+    if (!leafletMap) {
+      leafletMap = L.map('map-box').setView([latitude, longitude], 17);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(leafletMap);
+      leafletMarker = L.marker([latitude, longitude]).addTo(leafletMap);
+    } else {
+      leafletMap.setView([latitude, longitude], 17);
+      leafletMarker.setLatLng([latitude, longitude]);
+    }
+    setTimeout(() => leafletMap.invalidateSize(), 100);
+
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`, {headers:{'Accept-Language': lang === 'ru' ? 'ru' : 'uz,ru'}});
+      const data = await r.json();
+      const a = data.address || {};
+      const street = [a.house_number, a.road||a.pedestrian||a.path].filter(Boolean).join(' ');
+      const city = a.city||a.town||a.village||a.suburb||a.county||'';
+      document.getElementById('f-addr').value = street || data.display_name.split(',')[0];
+      document.getElementById('f-city').value = city;
+      document.getElementById('f-zip').value = a.postcode||'';
+      addrFields.style.display = 'flex';
+      locText.textContent = t('set_label')(Math.round(accuracy));
+      hint.classList.remove('hidden');
+      hint.textContent = data.display_name.split(',').slice(0,3).join(', ');
+    } catch(e) {
+      addrFields.style.display = 'flex';
+      locText.textContent = t('use_location');
+    }
+  };
+
+  watchId = navigator.geolocation.watchPosition(
+    async (pos) => {
+      const acc = pos.coords.accuracy;
+      if (!bestPos || acc < bestPos.coords.accuracy) {
+        bestPos = pos;
+        locText.textContent = t('improving')(Math.round(acc));
+      }
+      if (acc <= 30) {
+        navigator.geolocation.clearWatch(watchId);
+        clearTimeout(geoTimeout);
+        await applyPosition(pos);
+      }
+    },
+    () => { addrFields.style.display = 'flex'; locText.textContent = t('use_location'); },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+
+  const geoTimeout = setTimeout(async () => {
+    navigator.geolocation.clearWatch(watchId);
+    if (bestPos) await applyPosition(bestPos);
+    else { addrFields.style.display = 'flex'; locText.textContent = t('use_location'); }
+  }, 12000);
+}
+
+// ── Place order ───────────────────────────────────────────
+async function placeOrder() {
+  const name  = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const addr  = document.getElementById('f-addr').value.trim();
+  const city  = document.getElementById('f-city').value.trim();
+  const apt   = document.getElementById('f-apt').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
+  const lat   = parseFloat(document.getElementById('f-lat').value) || null;
+  const lon   = parseFloat(document.getElementById('f-lon').value) || null;
+  const fullNotes = [apt, notes].filter(Boolean).join(' — ');
+
+  if (!name || !phone) { alert(t('alert_name_phone')); return; }
+  if (!addr || !city)  { alert(t('alert_address')); return; }
+
+  const btn = document.getElementById('place-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[20px]">progress_activity</span> ${t('placing_order')}`;
+
+  const items = Object.keys(cart).map(id => {
+    const item = MENU.find(m => m.id == id);
+    return { id: item.id, name: item.name, emoji: item.emoji, price: item.price, qty: cart[id] };
+  });
+
+  try {
+    const r = await fetch(API + '/api/orders', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        customer_name: name, customer_phone: phone,
+        delivery_address: addr, delivery_city: city,
+        delivery_zip: document.getElementById('f-zip').value||'',
+        delivery_notes: fullNotes, items, lat, lon,
+        telegram_user_id: tg?.initDataUnsafe?.user?.id?.toString()||null
+      })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail||'Error');
+    saveOrderToHistory(data.order_number, data.total, items);
+    document.getElementById('success-order-num').textContent = data.order_number;
+    goTo('s-success');
+    startPolling(data.order_number);
+  } catch(e) {
+    alert(t('order_error') + e.message);
+    btn.disabled = false;
+    btn.innerHTML = `<span data-i18n="place_order">${t('place_order')}</span><span class="material-symbols-outlined">arrow_forward</span>`;
+  }
+}
+
+// ── Status polling ────────────────────────────────────────
+const STATUS_ORDER = ['pending','confirmed','preparing','out_for_delivery','delivered'];
+
+function startPolling(orderNumber) {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    try {
+      const r = await fetch(API + '/api/orders/' + encodeURIComponent(orderNumber) + '/status');
+      if (r.status === 404) {
+        clearInterval(pollInterval);
+        document.getElementById('success-order-num').textContent = t('order_removed_title');
+        document.getElementById('success-msg').textContent = t('order_removed_msg');
+        updateStatusSteps('cancelled');
+        removeOrderFromHistory(orderNumber); return;
+      }
+      const data = await r.json();
+      updateStatusSteps(data.status);
+      if (data.status === 'delivered' || data.status === 'cancelled') clearInterval(pollInterval);
+    } catch(e) {}
+  }, 5000);
+}
+
+function updateStatusSteps(status) {
+  const idx = STATUS_ORDER.indexOf(status);
+  STATUS_ORDER.forEach((s, i) => {
+    const dot = document.getElementById('dot-' + s);
+    const lbl = document.getElementById('lbl-' + s);
+    if (dot) dot.className = i <= idx
+      ? 'w-3 h-3 rounded-full bg-primary flex-shrink-0 shadow-sm'
+      : 'w-3 h-3 rounded-full bg-outline-variant flex-shrink-0';
+    if (lbl) lbl.className = i <= idx ? 'font-semibold text-on-surface text-sm' : 'text-on-surface-variant text-sm';
+  });
+}
+
+// ── Order history ─────────────────────────────────────────
+function saveOrderToHistory(orderNumber, total, items) {
+  const saved = JSON.parse(localStorage.getItem('cafeOrders')||'[]');
+  saved.unshift({ order_number: orderNumber, total, date: formatUzDateTime(),
+    items_summary: items.map(i=>`${i.emoji} ${i.name}×${i.qty}`).join('  '), status:'pending' });
+  localStorage.setItem('cafeOrders', JSON.stringify(saved.slice(0,30)));
+  document.getElementById('hist-btn').classList.remove('hidden');
+}
+
+function removeOrderFromHistory(orderNumber) {
+  const saved = JSON.parse(localStorage.getItem('cafeOrders')||'[]');
+  localStorage.setItem('cafeOrders', JSON.stringify(
+    saved.map(o => o.order_number===orderNumber ? {...o, status:'deleted'} : o)
+  ));
+}
+
+async function renderOrderHistory() {
+  const saved = JSON.parse(localStorage.getItem('cafeOrders')||'[]');
+  const el = document.getElementById('hist-list');
+  if (saved.length === 0) {
+    el.innerHTML = `<div class="flex flex-col items-center justify-center py-24 gap-4 text-on-surface-variant">
+      <span class="material-symbols-outlined text-6xl opacity-40">receipt_long</span>
+      <p class="font-semibold">${t('no_orders')}</p>
+      <p class="text-sm text-center max-w-xs">${t('no_orders_sub')}</p></div>`;
+    return;
+  }
+  const sc = {
+    pending:'bg-surface-container-high text-on-surface-variant',
+    confirmed:'bg-primary/10 text-primary', preparing:'bg-secondary-container/60 text-secondary',
+    out_for_delivery:'bg-primary/10 text-primary', delivered:'bg-primary/10 text-primary',
+    cancelled:'bg-error/10 text-error', deleted:'bg-error/10 text-error'
+  };
+  el.innerHTML = saved.map(o => `
+    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-4 shadow-[0_4px_16px_rgba(218,165,32,0.05)] flex flex-col gap-2">
+      <div class="flex items-start justify-between">
+        <div><span class="font-semibold text-primary">${o.order_number}</span>
+          <p class="text-xs text-on-surface-variant mt-0.5">${o.date}</p></div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="font-semibold text-on-surface text-sm">${fmt(o.total)}</span>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${sc[o.status||'pending']||sc.pending}" id="hb-${o.order_number.replace('#','')}">${t('status_' + (o.status||'pending')) || o.status}</span>
+        </div>
+      </div>
+      <p class="text-xs text-on-surface-variant leading-relaxed">${o.items_summary}</p>
+    </div>`).join('');
+
+  for (const o of saved) {
+    try {
+      const r = await fetch(API + '/api/orders/' + encodeURIComponent(o.order_number) + '/status');
+      const badge = document.getElementById('hb-' + o.order_number.replace('#',''));
+      if (r.status === 404) {
+        o.status = 'deleted';
+        if (badge) { badge.textContent = t('removed_cafe'); badge.className = `text-[11px] font-bold px-2 py-0.5 rounded-full ${sc.deleted}`; }
+      } else if (r.ok) {
+        const d = await r.json();
+        if (badge) { badge.textContent = t('status_' + d.status) || d.status; badge.className = `text-[11px] font-bold px-2 py-0.5 rounded-full ${sc[d.status]||sc.pending}`; }
+        o.status = d.status;
+      }
+    } catch {}
+  }
+  localStorage.setItem('cafeOrders', JSON.stringify(saved));
+}
+
+// ── Navigation ────────────────────────────────────────────
+const NAV_SCREENS = ['s-menu','s-cart','s-orders'];
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  if (id==='s-menu')   document.getElementById('nav-menu').classList.add('active');
+  if (id==='s-cart')   document.getElementById('nav-cart').classList.add('active');
+  if (id==='s-orders') document.getElementById('nav-orders').classList.add('active');
+  document.getElementById('bottom-nav').style.display = NAV_SCREENS.includes(id) ? 'flex' : 'none';
+  if (id==='s-cart') renderCart();
+  if (id==='s-checkout') {
+    renderCheckoutSummary(); prefillFromTelegram();
+    const pb = document.getElementById('place-btn');
+    pb.disabled = false;
+    pb.innerHTML = `<span data-i18n="place_order">${t('place_order')}</span><span class="material-symbols-outlined">arrow_forward</span>`;
+  }
+  if (id==='s-orders') renderOrderHistory();
+  window.scrollTo(0,0);
+}
+
+function newOrder() {
+  cart = {}; if (pollInterval) clearInterval(pollInterval);
+  updateCartBar(); renderMenu(); goTo('s-menu');
+}
+
+// Init
+if (localStorage.getItem('cafeOrders')) {
+  document.getElementById('hist-btn').classList.remove('hidden');
+}
+applyTranslations();
+updateLangBtns();
+setupCheckoutFocusBehavior();
+loadMenu();
+</script>
+</body>
+</html>

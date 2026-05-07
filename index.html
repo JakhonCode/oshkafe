@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cozy Café</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --cream:#FDF6EC;--warm:#F5E6CC;--brown:#3D2B1F;--mid:#7A5C44;
+  --accent:#C8873A;--accent2:#E8A85C;--light:#FFF9F2;
+  --border:rgba(61,43,31,0.12);--radius:12px;
+}
+html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--brown);overflow-x:hidden}
+h1,h2,h3,.serif{font-family:'Playfair Display',serif}
+
+/* Screens */
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex;animation:fadeUp 0.22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Header */
+.hdr{background:var(--accent);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.hdr-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;flex:1}
+.back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0;display:flex;align-items:center}
+.cart-pill{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.35);border-radius:20px;padding:5px 12px;color:#fff;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px}
+.cart-badge{background:#fff;color:var(--accent);border-radius:50%;width:18px;height:18px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* Hero */
+.hero{background:linear-gradient(150deg,#3D2B1F,#7A5C44);padding:32px 20px 28px;color:#fff;text-align:center}
+.hero-cup{font-size:50px;margin-bottom:10px;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.hero h1{font-size:28px;color:#fff;margin-bottom:5px}
+.hero p{font-size:13px;opacity:0.72}
+
+/* Category tabs */
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:52px;z-index:40}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:12px 16px;font-size:13px;font-weight:500;color:var(--mid);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all 0.2s}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Menu items */
+.menu-body{flex:1;padding:0 14px 90px}
+.cat-label{padding:14px 2px 6px;font-size:11px;font-weight:500;color:var(--mid);text-transform:uppercase;letter-spacing:.08em}
+.item{background:#fff;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:9px;display:flex;overflow:hidden;transition:transform 0.15s}
+.item:active{transform:scale(0.985)}
+.item-emo{width:68px;height:70px;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--warm);flex-shrink:0}
+.item-body{flex:1;padding:10px 12px}
+.item-name{font-size:14px;font-weight:500;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.item-desc{font-size:11px;color:var(--mid);margin-bottom:7px}
+.item-foot{display:flex;align-items:center;justify-content:space-between}
+.price{font-size:14px;font-weight:600;color:var(--accent)}
+.ctrl{display:flex;align-items:center;gap:7px}
+.cbtn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--accent);background:#fff;color:var(--accent);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:600;transition:all .15s;line-height:1}
+.cbtn:active{background:var(--accent);color:#fff}
+.cqty{font-size:14px;font-weight:600;min-width:16px;text-align:center}
+.add-btn{background:var(--accent);color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:500;cursor:pointer}
+.add-btn:active{background:var(--brown)}
+.badge{font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px}
+.badge-new{background:#E4F8E4;color:#1A6B1A}
+.badge-hot{background:#FFF0E0;color:#B86020}
+
+/* Cart bar */
+.cart-bar{position:fixed;bottom:0;left:0;right:0;padding:10px 16px 14px;background:var(--cream);border-top:1px solid var(--border);z-index:60}
+.cart-bar-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:14px 20px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:space-between;transition:all .15s}
+.cart-bar-btn:active{background:var(--brown)}
+
+/* Cart screen */
+.cart-list{flex:1;padding:14px 14px 0}
+.empty-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 20px;color:var(--mid)}
+.empty-icon{font-size:56px}
+.cart-item{background:#fff;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:9px;display:flex;align-items:center;gap:12px;padding:12px}
+.ci-emo{font-size:26px;width:42px;text-align:center}
+.ci-info{flex:1}
+.ci-name{font-size:14px;font-weight:500}
+.ci-sub{font-size:12px;color:var(--mid);margin-top:2px}
+.sum-box{background:#fff;border-radius:var(--radius);border:1px solid var(--border);margin:12px 14px;padding:14px}
+.sum-row{display:flex;justify-content:space-between;font-size:13px;color:var(--mid);margin-bottom:7px}
+.sum-row.tot{font-size:15px;font-weight:600;color:var(--brown);margin-top:9px;padding-top:9px;border-top:1px solid var(--border);margin-bottom:0}
+
+/* Forms */
+.form-wrap{flex:1;padding:16px 14px 100px;overflow-y:auto}
+.form-section{font-family:'Playfair Display',serif;font-size:18px;color:var(--brown);margin-bottom:16px}
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:11px;font-weight:500;color:var(--mid);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.fi{width:100%;background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 13px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--brown);outline:none;transition:border .2s;-webkit-appearance:none}
+.fi:focus{border-color:var(--accent)}
+.fi::placeholder{color:#bbb}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.order-mini{background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:14px;margin-bottom:16px}
+.order-mini-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:var(--mid)}
+.order-mini-row:last-child{border-top:1px solid var(--border);padding-top:9px;margin-top:6px;margin-bottom:0;font-size:14px;font-weight:600;color:var(--brown)}
+
+/* Bottom fixed btn */
+.btm{position:fixed;bottom:0;left:0;right:0;padding:10px 14px 14px;background:var(--cream);border-top:1px solid var(--border);z-index:60}
+.pbtn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.pbtn:active{background:var(--brown)}
+.pbtn:disabled{background:var(--mid);cursor:default;opacity:.7}
+
+/* Success */
+.success{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:14px}
+.s-icon{font-size:68px;animation:pop .45s cubic-bezier(.36,1.5,.6,1)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.s-title{font-size:26px}
+.s-text{font-size:14px;color:var(--mid);line-height:1.65;max-width:280px}
+.order-chip{background:var(--warm);border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;color:var(--accent);margin:4px 0}
+.status-steps{display:flex;flex-direction:column;gap:0;width:100%;max-width:300px;margin-top:8px}
+.step{display:flex;align-items:center;gap:12px;padding:8px 0}
+.step-dot{width:10px;height:10px;border-radius:50%;background:var(--warm);border:2px solid var(--accent);flex-shrink:0;transition:all .3s}
+.step-dot.done{background:var(--accent)}
+.step-line{width:2px;height:16px;background:var(--warm);margin-left:4px;margin-top:-4px;margin-bottom:-4px}
+.step-label{font-size:13px;color:var(--mid)}
+.step-label.done{color:var(--brown);font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- SCREEN: Menu -->
+<div id="s-menu" class="screen active">
+  <div class="hdr">
+    <span class="hdr-title">☕ Cozy Café</span>
+    <div class="cart-pill" onclick="goTo('s-cart')">
+      🛒 <span id="hdr-total">Cart</span>
+      <span class="cart-badge" id="hdr-badge" style="display:none">0</span>
+    </div>
+  </div>
+  <div class="hero">
+    <span class="hero-cup">☕</span>
+    <h1>Good to see you!</h1>
+    <p>Order from our menu — delivered to your door</p>
+  </div>
+  <div class="tabs" id="tabs">
+    <div class="tab on" onclick="filterCat('all',this)">All</div>
+    <div class="tab" onclick="filterCat('coffee',this)">Coffee</div>
+    <div class="tab" onclick="filterCat('drinks',this)">Drinks</div>
+    <div class="tab" onclick="filterCat('food',this)">Food</div>
+    <div class="tab" onclick="filterCat('desserts',this)">Desserts</div>
+  </div>
+  <div class="menu-body" id="menu-body">
+    <div style="padding:40px;text-align:center;color:var(--mid)">Loading menu…</div>
+  </div>
+  <div class="cart-bar" id="cart-bar" style="display:none">
+    <button class="cart-bar-btn" onclick="goTo('s-cart')">
+      <span id="cbar-items">View order</span>
+      <span id="cbar-price">0 so'm</span>
+    </button>
+  </div>
+</div>
+
+<!-- SCREEN: Cart -->
+<div id="s-cart" class="screen">
+  <div class="hdr">
+    <button class="back-btn" onclick="goTo('s-menu')">←</button>
+    <span class="hdr-title">Your Order</span>
+  </div>
+  <div id="cart-list" class="cart-list"></div>
+  <div id="cart-sum" style="display:none">
+    <div class="sum-box">
+      <div class="sum-row"><span>Subtotal</span><span id="sum-sub">0 so'm</span></div>
+      <div class="sum-row"><span>Delivery fee</span><span>15 000 so'm</span></div>
+      <div class="sum-row tot"><span>Total</span><span id="sum-tot">0 so'm</span></div>
+    </div>
+  </div>
+  <div class="btm">
+    <button class="pbtn" id="to-checkout" onclick="goTo('s-checkout')" disabled>Proceed to checkout</button>
+  </div>
+</div>
+
+<!-- SCREEN: Checkout -->
+<div id="s-checkout" class="screen">
+  <div class="hdr">
+    <button class="back-btn" onclick="goTo('s-cart')">←</button>
+    <span class="hdr-title">Delivery Details</span>
+  </div>
+  <div class="form-wrap">
+    <p class="form-section">Where should we deliver?</p>
+    <div class="fg"><label class="fl">Full name</label><input class="fi" id="f-name" placeholder="Alex Johnson" autocomplete="name"></div>
+    <div class="fg"><label class="fl">Phone number</label><input class="fi" id="f-phone" type="tel" placeholder="+1 234 567 8900" autocomplete="tel"></div>
+    <div class="fg"><label class="fl">Street address</label><input class="fi" id="f-addr" placeholder="123 Main St, Apt 4B" autocomplete="street-address"></div>
+    <div class="form-row">
+      <div class="fg"><label class="fl">City</label><input class="fi" id="f-city" placeholder="City" autocomplete="address-level2"></div>
+      <div class="fg"><label class="fl">Postal code</label><input class="fi" id="f-zip" placeholder="12345" autocomplete="postal-code"></div>
+    </div>
+    <div class="fg"><label class="fl">Notes (optional)</label><input class="fi" id="f-notes" placeholder="Ring bell, leave at door…"></div>
+    <p class="form-section" style="margin-top:10px">Order summary</p>
+    <div class="order-mini" id="checkout-mini"></div>
+  </div>
+  <div class="btm">
+    <button class="pbtn" id="place-btn" onclick="placeOrder()">Place order →</button>
+  </div>
+</div>
+
+<!-- SCREEN: Success -->
+<div id="s-success" class="screen">
+  <div class="success">
+    <div class="s-icon">🎉</div>
+    <h2 class="s-title">Order placed!</h2>
+    <p class="s-text">We've received your order and will start preparing it shortly. You'll get a Telegram notification when it's on its way!</p>
+    <div class="order-chip" id="order-chip">#000000</div>
+    <div class="status-steps" id="status-steps">
+      <div class="step"><div class="step-dot done" id="dot-pending"></div><span class="step-label done">Order received</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="dot-confirmed"></div><span class="step-label" id="lbl-confirmed">Confirmed by café</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="dot-preparing"></div><span class="step-label" id="lbl-preparing">Being prepared</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="dot-out_for_delivery"></div><span class="step-label" id="lbl-out_for_delivery">Out for delivery</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="dot-delivered"></div><span class="step-label" id="lbl-delivered">Delivered 🎊</span></div>
+    </div>
+    <button class="pbtn" style="margin-top:16px;max-width:280px" onclick="newOrder()">Order again</button>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+const tg = window.Telegram?.WebApp;
+if(tg) tg.expand();
+
+let MENU = [];
+let cart = {};
+let currentCat = 'all';
+let currentOrderNumber = null;
+let pollInterval = null;
+const DELIVERY_FEE = 15000;
+
+// ── Load menu ─────────────────────────────────────────────
+async function loadMenu() {
+  try {
+    const r = await fetch(API + '/api/menu');
+    MENU = await r.json();
+    renderMenu();
+  } catch(e) {
+    document.getElementById('menu-body').innerHTML =
+      '<div style="padding:40px;text-align:center;color:#c00">Could not load menu. Is the server running?</div>';
+  }
+}
+
+function fmt(n){ return `${Math.round(Number(n) || 0).toLocaleString('ru-RU')} so'm`; }
+
+function renderMenu() {
+  const items = currentCat === 'all' ? MENU : MENU.filter(i => i.category === currentCat);
+  const catLabels = {coffee:'☕ Coffee', drinks:'🧃 Drinks', food:'🍽 Food', desserts:'🍰 Desserts'};
+  let html = ''; let lastCat = null;
+  items.forEach(item => {
+    if(currentCat === 'all' && item.category !== lastCat) {
+      html += `<div class="cat-label">${catLabels[item.category]}</div>`;
+      lastCat = item.category;
+    }
+    const qty = cart[item.id] || 0;
+    const badge = item.badge === 'new'
+      ? '<span class="badge badge-new">New</span>'
+      : item.badge === 'hot' ? '<span class="badge badge-hot">Popular</span>' : '';
+    html += `<div class="item">
+      <div class="item-emo">${item.emoji}</div>
+      <div class="item-body">
+        <div class="item-name">${item.name} ${badge}</div>
+        <div class="item-desc">${item.description || ''}</div>
+        <div class="item-foot">
+          <span class="price">${fmt(item.price)}</span>
+          <div class="ctrl" id="ctrl-${item.id}">
+            ${qty === 0
+              ? `<button class="add-btn" onclick="add(${item.id})">+ Add</button>`
+              : `<button class="cbtn" onclick="dec(${item.id})">−</button>
+                 <span class="cqty">${qty}</span>
+                 <button class="cbtn" onclick="add(${item.id})">+</button>`}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('menu-body').innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--mid)">No items in this category</div>';
+}
+
+function updateCartBar() {
+  let count = 0, total = 0;
+  Object.keys(cart).forEach(id => {
+    const item = MENU.find(m => m.id == id);
+    if(!item) return;
+    count += cart[id]; total += item.price * cart[id];
+  });
+  const bar = document.getElementById('cart-bar');
+  const badge = document.getElementById('hdr-badge');
+  if(count > 0) {
+    bar.style.display = 'block';
+    document.getElementById('cbar-items').textContent = count + (count === 1 ? ' item' : ' items');
+    document.getElementById('cbar-price').textContent = fmt(total);
+    badge.style.display = 'flex'; badge.textContent = count;
+    document.getElementById('hdr-total').textContent = fmt(total);
+  } else {
+    bar.style.display = 'none';
+    badge.style.display = 'none';
+    document.getElementById('hdr-total').textContent = 'Cart';
+  }
+}
+
+function updateCtrl(id) {
+  const el = document.getElementById('ctrl-' + id);
+  if(!el) return;
+  const qty = cart[id] || 0;
+  el.innerHTML = qty === 0
+    ? `<button class="add-btn" onclick="add(${id})">+ Add</button>`
+    : `<button class="cbtn" onclick="dec(${id})">−</button><span class="cqty">${qty}</span><button class="cbtn" onclick="add(${id})">+</button>`;
+}
+
+function add(id) { cart[id] = (cart[id] || 0) + 1; updateCtrl(id); updateCartBar(); }
+function dec(id) { if(cart[id] > 1) cart[id]--; else delete cart[id]; updateCtrl(id); updateCartBar(); }
+function filterCat(cat, el) {
+  currentCat = cat;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  renderMenu();
+}
+
+// ── Cart screen ───────────────────────────────────────────
+function renderCart() {
+  const keys = Object.keys(cart);
+  const listEl = document.getElementById('cart-list');
+  const sumEl = document.getElementById('cart-sum');
+  const btn = document.getElementById('to-checkout');
+  if(keys.length === 0) {
+    listEl.innerHTML = `<div class="empty-cart"><div class="empty-icon">🛒</div><p style="font-size:15px;font-weight:500">Your cart is empty</p><p style="font-size:13px;margin-top:4px">Go back and add some items!</p></div>`;
+    sumEl.style.display = 'none'; btn.disabled = true; return;
+  }
+  let sub = 0, html = '';
+  keys.forEach(id => {
+    const item = MENU.find(m => m.id == id); if(!item) return;
+    const qty = cart[id]; sub += item.price * qty;
+    html += `<div class="cart-item">
+      <div class="ci-emo">${item.emoji}</div>
+      <div class="ci-info"><div class="ci-name">${item.name}</div><div class="ci-sub">${fmt(item.price)} each — ${fmt(item.price * qty)}</div></div>
+      <div class="ctrl">
+        <button class="cbtn" onclick="decCart(${id})">−</button>
+        <span class="cqty">${qty}</span>
+        <button class="cbtn" onclick="addCart(${id})">+</button>
+      </div>
+    </div>`;
+  });
+  listEl.innerHTML = html;
+  document.getElementById('sum-sub').textContent = fmt(sub);
+  document.getElementById('sum-tot').textContent = fmt(sub + DELIVERY_FEE);
+  sumEl.style.display = 'block'; btn.disabled = false;
+}
+
+function addCart(id) { add(id); renderCart(); }
+function decCart(id) { dec(id); renderCart(); }
+
+// ── Checkout ──────────────────────────────────────────────
+function renderCheckoutMini() {
+  let html = ''; let sub = 0;
+  Object.keys(cart).forEach(id => {
+    const item = MENU.find(m => m.id == id); if(!item) return;
+    const qty = cart[id]; sub += item.price * qty;
+    html += `<div class="order-mini-row"><span>${item.emoji} ${item.name} ×${qty}</span><span>${fmt(item.price * qty)}</span></div>`;
+  });
+  html += `<div class="order-mini-row"><span>Total (incl. delivery)</span><span>${fmt(sub + DELIVERY_FEE)}</span></div>`;
+  document.getElementById('checkout-mini').innerHTML = html;
+}
+
+async function placeOrder() {
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const addr = document.getElementById('f-addr').value.trim();
+  const city = document.getElementById('f-city').value.trim();
+  const zip = document.getElementById('f-zip').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
+  if(!name || !phone || !addr || !city) { alert('Please fill in name, phone, address and city.'); return; }
+  const btn = document.getElementById('place-btn');
+  btn.disabled = true; btn.textContent = 'Placing order…';
+  const items = Object.keys(cart).map(id => {
+    const item = MENU.find(m => m.id == id);
+    return { id: item.id, name: item.name, emoji: item.emoji, price: item.price, qty: cart[id] };
+  });
+  try {
+    const r = await fetch(API + '/api/orders', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        customer_name: name, customer_phone: phone,
+        delivery_address: addr, delivery_city: city,
+        delivery_zip: zip, delivery_notes: notes, items,
+        telegram_user_id: tg?.initDataUnsafe?.user?.id?.toString() || null
+      })
+    });
+    const data = await r.json();
+    if(!r.ok) throw new Error(data.detail || 'Error');
+    currentOrderNumber = data.order_number;
+    document.getElementById('order-chip').textContent = 'Order ' + data.order_number;
+    goTo('s-success');
+    startPolling(data.order_number);
+  } catch(e) {
+    alert('Could not place order: ' + e.message);
+    btn.disabled = false; btn.textContent = 'Place order →';
+  }
+}
+
+// ── Status polling ─────────────────────────────────────────
+const STATUS_ORDER = ['pending','confirmed','preparing','out_for_delivery','delivered'];
+function startPolling(orderNumber) {
+  if(pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    try {
+      const r = await fetch(API + '/api/orders/' + encodeURIComponent(orderNumber) + '/status');
+      const data = await r.json();
+      updateStatusSteps(data.status);
+      if(data.status === 'delivered' || data.status === 'cancelled') clearInterval(pollInterval);
+    } catch(e) {}
+  }, 5000);
+}
+function updateStatusSteps(status) {
+  const idx = STATUS_ORDER.indexOf(status);
+  STATUS_ORDER.forEach((s, i) => {
+    const dot = document.getElementById('dot-' + s);
+    const lbl = document.getElementById('lbl-' + s);
+    if(dot) { dot.classList.toggle('done', i <= idx); }
+    if(lbl) { lbl.classList.toggle('done', i <= idx); }
+  });
+}
+
+// ── Nav ───────────────────────────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id === 's-cart') renderCart();
+  if(id === 's-checkout') renderCheckoutMini();
+  window.scrollTo(0, 0);
+}
+function newOrder() {
+  cart = {}; currentOrderNumber = null;
+  if(pollInterval) clearInterval(pollInterval);
+  updateCartBar(); renderMenu(); goTo('s-menu');
+}
+
+loadMenu();
+</script>
+</body>
+</html>

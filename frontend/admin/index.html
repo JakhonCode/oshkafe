@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html class="light" lang="uz">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Osh Kafe — Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "on-primary-fixed":"#00210c","inverse-primary":"#61de8a","surface-dim":"#dadad7",
+        "on-tertiary-fixed":"#191c1b","surface-container-highest":"#e2e3df","on-error":"#ffffff",
+        "on-surface":"#1a1c1a","surface-bright":"#faf9f6","on-secondary":"#ffffff",
+        "on-primary-container":"#00391a","tertiary":"#5c5f5e","secondary-fixed":"#ffdea0",
+        "surface-container":"#eeeeea","tertiary-container":"#969997","surface":"#faf9f6",
+        "on-secondary-fixed-variant":"#5c4300","inverse-surface":"#2f312f",
+        "surface-container-high":"#e8e8e5","error":"#ba1a1a","surface-tint":"#006d37",
+        "on-primary":"#ffffff","outline-variant":"#bccabc","on-tertiary-fixed-variant":"#444746",
+        "on-secondary-fixed":"#261900","tertiary-fixed-dim":"#c5c7c5","outline":"#6d7a6e",
+        "on-tertiary":"#ffffff","surface-variant":"#e2e3df","on-surface-variant":"#3d4a3f",
+        "inverse-on-surface":"#f1f1ed","background":"#faf9f6","secondary":"#795900",
+        "primary-container":"#27ae60","surface-container-low":"#f4f4f0","on-background":"#1a1c1a",
+        "secondary-container":"#fcc340","surface-container-lowest":"#ffffff",
+        "primary-fixed-dim":"#61de8a","secondary-fixed-dim":"#f6be3b",
+        "on-secondary-container":"#6f5100","tertiary-fixed":"#e1e3e1",
+        "on-tertiary-container":"#2e3130","primary-fixed":"#7efba4",
+        "error-container":"#ffdad6","on-error-container":"#93000a",
+        "primary":"#006d37","on-primary-fixed-variant":"#005228"
+      },
+      borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
+      spacing:{"container-margin":"16px","unit":"4px","gutter":"12px","section-padding":"24px","stack-gap":"12px"},
+      fontFamily:{"headline-md":["Epilogue"],"title-sm":["Plus Jakarta Sans"],"display-lg":["Epilogue"],"body-md":["Plus Jakarta Sans"],"label-caps":["Plus Jakarta Sans"]},
+      fontSize:{
+        "headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],
+        "title-sm":["18px",{"lineHeight":"24px","fontWeight":"600"}],
+        "display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],
+        "body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],
+        "label-caps":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"700"}]
+      }
+    }
+  }
+}
+</script>
+<style>
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.atlas-pattern { background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30L15 30z' fill='%23DAA520' fill-opacity='0.04'/%3E%3C/svg%3E"); }
+.uzbek-pattern { background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 25L55 30L35 35L30 55L25 35L5 30L25 25L30 5Z' fill='%23DAA520' fill-opacity='0.04'/%3E%3C/svg%3E"); }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.page { display: none; }
+.page.active { display: block; }
+.nav-tab.active .nav-icon { background-color: #fcc340; border-radius: 9999px; }
+.nav-tab.active .nav-label, .nav-tab.active .material-symbols-outlined { color: #6f5100; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+body { min-height: max(884px, 100dvh); font-family: 'Plus Jakarta Sans', sans-serif; }
+</style>
+</head>
+<body class="bg-background text-on-surface">
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- LOGIN SCREEN                                           -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="login-screen" class="min-h-screen uzbek-pattern flex flex-col items-center justify-center p-container-margin">
+  <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary-container to-primary-container opacity-40"></div>
+
+  <!-- Lang switcher on login -->
+  <div class="fixed top-4 right-4 flex items-center bg-surface-container-high rounded-full p-0.5 gap-0.5 shadow-sm">
+    <button data-lang="uz" onclick="setLang('uz')" class="px-3 py-1.5 rounded-full text-xs font-bold transition-all">UZ</button>
+    <button data-lang="ru" onclick="setLang('ru')" class="px-3 py-1.5 rounded-full text-xs font-bold transition-all">RU</button>
+  </div>
+
+  <div class="flex flex-col items-center mb-10">
+    <div class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center shadow-[0_8px_24px_rgba(39,174,96,0.2)] mb-4">
+      <span class="material-symbols-outlined text-on-primary-container" style="font-size:40px;font-variation-settings:'FILL' 1;">restaurant</span>
+    </div>
+    <h1 class="font-display-lg text-display-lg text-primary">Osh Kafe</h1>
+    <p class="font-label-caps text-label-caps text-on-surface-variant tracking-[0.2em] mt-1" data-i18n="portal"></p>
+  </div>
+
+  <div class="w-full max-w-sm">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-8 shadow-[0_12px_40px_rgba(218,165,32,0.12)]">
+      <div class="mb-8">
+        <h2 class="font-headline-md text-headline-md text-on-surface" data-i18n="welcome"></h2>
+        <p class="text-on-surface-variant text-sm mt-1" data-i18n="sign_in_sub"></p>
+      </div>
+      <form onsubmit="doLogin(event)" class="space-y-5">
+        <div class="space-y-1.5">
+          <label class="font-label-caps text-label-caps text-on-surface-variant ml-1" data-i18n="admin_secret"></label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-outline">lock</span>
+            </div>
+            <input id="login-secret" type="password" data-i18n-ph="secret_placeholder" autocomplete="current-password"
+              class="w-full h-14 bg-surface-container rounded-lg pl-12 pr-12 border-none focus:ring-2 focus:ring-secondary-container text-on-surface transition-all outline-none"/>
+            <button type="button" onclick="togglePwd()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-outline hover:text-on-surface-variant">
+              <span id="pwd-eye" class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
+        </div>
+        <p id="login-err" class="text-error text-sm hidden" data-i18n="login_err"></p>
+        <button type="submit" class="w-full h-14 bg-secondary-container text-on-secondary-container font-semibold rounded-lg shadow-[0_4px_12px_rgba(252,195,64,0.3)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+          <span data-i18n="sign_in"></span>
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </form>
+    </div>
+    <div class="mt-6 flex items-center justify-center gap-2 opacity-50">
+      <span class="material-symbols-outlined text-[18px]">verified_user</span>
+      <span class="font-label-caps text-label-caps" data-i18n="secure"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- APP SHELL                                              -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="app" style="display:none;" class="atlas-pattern min-h-screen pb-24">
+
+  <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md shadow-[0_4px_12px_rgba(218,165,32,0.08)] flex justify-between items-center px-container-margin h-16">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">restaurant</span>
+      <h1 class="font-headline-md text-headline-md text-primary">Osh Kafe</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center bg-surface-container-high rounded-full p-0.5 gap-0.5">
+        <button data-lang="uz" onclick="setLang('uz')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">UZ</button>
+        <button data-lang="ru" onclick="setLang('ru')" class="px-2.5 py-1 rounded-full text-xs font-bold transition-all">RU</button>
+      </div>
+      <button onclick="refreshCurrent()" class="text-on-surface-variant hover:opacity-70 transition-opacity active:scale-90">
+        <span class="material-symbols-outlined">refresh</span>
+      </button>
+      <button onclick="doLogout()" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-on-surface-variant text-sm hover:bg-surface-container-highest transition-colors">A</button>
+    </div>
+  </header>
+
+  <!-- ── ORDERS PAGE ──────────────────────────────────── -->
+  <div id="page-orders" class="page active pt-20 px-container-margin max-w-5xl mx-auto">
+    <div class="grid grid-cols-3 gap-3 my-5">
+      <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(218,165,32,0.05)] border-l-4 border-primary">
+        <p class="font-label-caps text-[10px] text-on-surface-variant mb-1" data-i18n="stat_today"></p>
+        <h2 id="stat-today" class="text-[28px] font-bold text-on-surface leading-none">—</h2>
+      </div>
+      <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(218,165,32,0.05)] border-l-4 border-secondary-container">
+        <p class="font-label-caps text-[10px] text-on-surface-variant mb-1" data-i18n="stat_pending"></p>
+        <h2 id="stat-pending" class="text-[28px] font-bold text-on-surface leading-none">—</h2>
+      </div>
+      <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(218,165,32,0.05)] border-l-4 border-primary-container">
+        <p class="font-label-caps text-[10px] text-on-surface-variant mb-1" data-i18n="stat_revenue"></p>
+        <h2 id="stat-revenue" class="text-[22px] font-bold text-on-surface leading-none">—</h2>
+      </div>
+    </div>
+
+    <div class="flex gap-2 overflow-x-auto pb-3 no-scrollbar mb-5">
+      <button class="filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-primary text-on-primary shadow-md" onclick="setFilter('all',this)" data-i18n="filter_all"></button>
+      <button class="filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant" onclick="setFilter('pending',this)" data-i18n="filter_pending"></button>
+      <button class="filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant" onclick="setFilter('confirmed',this)" data-i18n="filter_confirmed"></button>
+      <button class="filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant" onclick="setFilter('preparing',this)" data-i18n="filter_preparing"></button>
+      <button class="filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant" onclick="setFilter('out_for_delivery',this)" data-i18n="filter_on_way"></button>
+      <button class="filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant" onclick="setFilter('delivered',this)" data-i18n="filter_delivered"></button>
+      <button class="filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant" onclick="setFilter('cancelled',this)" data-i18n="filter_cancelled"></button>
+    </div>
+
+    <div id="orders-list" class="space-y-4 pb-6"></div>
+  </div>
+
+  <!-- ── MENU PAGE ─────────────────────────────────────── -->
+  <!-- STATISTICS PAGE -->
+  <div id="page-statistics" class="page pt-20 px-container-margin max-w-6xl mx-auto">
+    <div class="flex items-center justify-between gap-3 my-5">
+      <h2 class="font-headline-md text-headline-md text-on-surface" data-i18n="stats_title"></h2>
+      <button onclick="downloadStatistics()" class="bg-primary text-on-primary px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-transform shadow-[0_4px_12px_rgba(0,109,55,0.25)]">
+        <span class="material-symbols-outlined text-[20px]">download</span>
+        <span class="font-semibold text-sm" data-i18n="stats_download"></span>
+      </button>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/20 shadow-[0_4px_12px_rgba(218,165,32,0.05)] flex flex-col md:flex-row md:items-end gap-3 my-5">
+      <label class="flex-1">
+        <span class="font-label-caps text-label-caps text-on-surface-variant block mb-1" data-i18n="stats_from"></span>
+        <div class="stats-date-picker relative">
+          <input id="stats-date-from-display" type="text" readonly onclick="openStatsCalendar('from')" class="w-full bg-surface-container rounded-lg py-3 px-3 pr-10 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none cursor-pointer" placeholder="kun.oy.yil">
+          <input id="stats-date-from" type="hidden">
+          <button type="button" onclick="openStatsCalendar('from')" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+          </button>
+          <div id="stats-cal-from" class="hidden absolute z-[80] mt-2 left-0 w-[292px] bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-[0_16px_48px_rgba(0,0,0,0.18)] p-3"></div>
+        </div>
+      </label>
+      <label class="flex-1">
+        <span class="font-label-caps text-label-caps text-on-surface-variant block mb-1" data-i18n="stats_to"></span>
+        <div class="stats-date-picker relative">
+          <input id="stats-date-to-display" type="text" readonly onclick="openStatsCalendar('to')" class="w-full bg-surface-container rounded-lg py-3 px-3 pr-10 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none cursor-pointer" placeholder="kun.oy.yil">
+          <input id="stats-date-to" type="hidden">
+          <button type="button" onclick="openStatsCalendar('to')" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+          </button>
+          <div id="stats-cal-to" class="hidden absolute z-[80] mt-2 left-0 w-[292px] bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-[0_16px_48px_rgba(0,0,0,0.18)] p-3"></div>
+        </div>
+      </label>
+      <div class="flex gap-2">
+        <button onclick="loadOrderStatistics()" class="h-11 px-4 rounded-lg bg-primary text-on-primary font-semibold text-sm active:scale-95 transition-transform" data-i18n="stats_apply"></button>
+        <button onclick="clearStatisticsDates()" class="h-11 px-4 rounded-lg border border-outline-variant text-on-surface font-semibold text-sm active:scale-95 transition-transform" data-i18n="stats_clear"></button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-5">
+      <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(218,165,32,0.05)] border-l-4 border-primary">
+        <p class="font-label-caps text-[10px] text-on-surface-variant mb-1" data-i18n="stats_all_orders"></p>
+        <h2 id="hist-total" class="text-[26px] font-bold text-on-surface leading-none">-</h2>
+      </div>
+      <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(218,165,32,0.05)] border-l-4 border-secondary-container">
+        <p class="font-label-caps text-[10px] text-on-surface-variant mb-1" data-i18n="stats_net_revenue"></p>
+        <h2 id="hist-net" class="text-[20px] font-bold text-on-surface leading-none">-</h2>
+      </div>
+      <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(218,165,32,0.05)] border-l-4 border-primary-container">
+        <p class="font-label-caps text-[10px] text-on-surface-variant mb-1" data-i18n="stats_deleted"></p>
+        <h2 id="hist-deleted" class="text-[26px] font-bold text-on-surface leading-none">-</h2>
+      </div>
+      <div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(218,165,32,0.05)] border-l-4 border-error">
+        <p class="font-label-caps text-[10px] text-on-surface-variant mb-1" data-i18n="stats_cancelled"></p>
+        <h2 id="hist-cancelled" class="text-[26px] font-bold text-on-surface leading-none">-</h2>
+      </div>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 shadow-[0_4px_12px_rgba(218,165,32,0.06)] mb-24">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[860px] text-sm">
+          <thead class="bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps">
+            <tr>
+              <th class="text-left px-4 py-3" data-i18n="stats_col_order"></th>
+              <th class="text-left px-4 py-3" data-i18n="stats_col_customer"></th>
+              <th class="text-left px-4 py-3" data-i18n="stats_col_items"></th>
+              <th class="text-left px-4 py-3" data-i18n="stats_col_status"></th>
+              <th class="text-right px-4 py-3" data-i18n="stats_col_total"></th>
+              <th class="text-left px-4 py-3" data-i18n="stats_col_created"></th>
+              <th class="text-left px-4 py-3" data-i18n="stats_col_deleted"></th>
+            </tr>
+          </thead>
+          <tbody id="statistics-list" class="divide-y divide-outline-variant/20"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-menu" class="page pt-20 px-container-margin max-w-5xl mx-auto">
+    <div class="flex items-center justify-between my-5">
+      <h2 class="font-headline-md text-headline-md text-on-surface" data-i18n="menu_title"></h2>
+      <button onclick="openAddModal()" class="bg-primary text-on-primary px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-transform shadow-[0_4px_12px_rgba(0,109,55,0.25)]">
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        <span class="font-semibold text-sm" data-i18n="add_item"></span>
+      </button>
+    </div>
+
+    <div id="menu-filters" class="flex gap-2 overflow-x-auto pb-3 no-scrollbar mb-5"></div>
+
+    <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6"></div>
+  </div>
+
+  <nav class="fixed bottom-0 w-full z-50 bg-surface rounded-t-xl shadow-[0_-4px_16px_rgba(218,165,32,0.1)] flex justify-around items-center h-[72px] px-2">
+    <button id="nav-orders" class="nav-tab active flex flex-col items-center justify-center gap-0.5 px-8 py-1" onclick="showPage('orders')">
+      <div class="nav-icon w-16 h-8 flex items-center justify-center">
+        <span class="material-symbols-outlined">receipt_long</span>
+      </div>
+      <span class="nav-label font-label-caps text-label-caps text-on-surface-variant" data-i18n="nav_orders"></span>
+    </button>
+    <button id="nav-statistics" class="nav-tab flex flex-col items-center justify-center gap-0.5 px-5 py-1" onclick="showPage('statistics')">
+      <div class="nav-icon w-16 h-8 flex items-center justify-center">
+        <span class="material-symbols-outlined">query_stats</span>
+      </div>
+      <span class="nav-label font-label-caps text-label-caps text-on-surface-variant" data-i18n="nav_statistics"></span>
+    </button>
+    <button id="nav-menu" class="nav-tab flex flex-col items-center justify-center gap-0.5 px-5 py-1" onclick="showPage('menu')">
+      <div class="nav-icon w-16 h-8 flex items-center justify-center">
+        <span class="material-symbols-outlined">menu_book</span>
+      </div>
+      <span class="nav-label font-label-caps text-label-caps text-on-surface-variant" data-i18n="nav_menu"></span>
+    </button>
+  </nav>
+</div>
+
+<!-- DELETE MODAL -->
+<div id="del-modal" class="hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-6">
+  <div class="bg-surface-container-lowest rounded-xl p-8 max-w-xs w-full text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)] border border-outline-variant/30">
+    <div class="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-error text-[32px]">delete</span>
+    </div>
+    <h3 id="del-title" class="font-headline-md text-headline-md text-on-surface mb-2"></h3>
+    <p class="text-on-surface-variant text-sm mb-6" data-i18n="del_sub"></p>
+    <div class="flex gap-3">
+      <button onclick="closeDelModal()" class="flex-1 h-12 border border-outline-variant rounded-lg text-on-surface font-semibold active:scale-95 transition-transform" data-i18n="del_cancel"></button>
+      <button id="del-confirm-btn" class="flex-1 h-12 bg-error text-on-error rounded-lg font-semibold active:scale-95 transition-transform" data-i18n="del_confirm"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ITEM MODAL -->
+<div id="add-modal" class="hidden fixed inset-0 bg-black/60 z-[9998] items-end sm:items-center justify-center">
+  <div class="bg-surface-container-lowest rounded-t-2xl sm:rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-[0_-8px_40px_rgba(0,0,0,0.2)]">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-headline-md text-headline-md text-on-surface" data-i18n="add_modal_title"></h3>
+      <button onclick="closeAddModal()" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <div onclick="document.getElementById('photo-file').click()" class="border-2 border-dashed border-outline-variant rounded-xl p-5 text-center cursor-pointer hover:border-primary transition-colors mb-4">
+      <canvas id="photo-canvas" style="display:none"></canvas>
+      <img id="photo-preview" class="w-full h-32 object-cover rounded-lg mb-2 hidden"/>
+      <div id="photo-placeholder" class="flex flex-col items-center gap-2 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[36px]">add_photo_alternate</span>
+        <span class="text-sm" data-i18n="photo_label"></span>
+      </div>
+      <input id="photo-file" type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)"/>
+    </div>
+
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_category"></label>
+          <div class="flex gap-2">
+            <select id="new-cat" class="min-w-0 flex-1 bg-surface-container rounded-lg py-3 px-3 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none"></select>
+            <button type="button" onclick="toggleNewCategory()" class="w-12 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center active:scale-95 transition-transform">
+              <span class="material-symbols-outlined text-[20px]">create_new_folder</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_emoji"></label>
+          <input id="new-emoji" type="text" placeholder="🍽" maxlength="2" class="bg-surface-container rounded-lg py-3 px-3 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none"/>
+        </div>
+      </div>
+      <div id="new-category-box" class="hidden grid grid-cols-[1fr_auto] gap-2">
+        <input id="new-category-name" type="text" data-i18n-ph="category_placeholder" class="bg-surface-container rounded-lg py-3 px-3 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none"/>
+        <button type="button" onclick="createCategory()" class="bg-secondary-container text-on-secondary-container rounded-lg px-4 font-semibold active:scale-95 transition-transform" data-i18n="create_category"></button>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_name"></label>
+        <input id="new-name" type="text" data-i18n-ph="name_placeholder" class="bg-surface-container rounded-lg py-3 px-3 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none"/>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_desc"></label>
+        <input id="new-desc" type="text" data-i18n-ph="desc_placeholder" class="bg-surface-container rounded-lg py-3 px-3 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_price"></label>
+          <input id="new-price" type="number" step="1000" placeholder="35000" class="bg-surface-container rounded-lg py-3 px-3 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="font-label-caps text-label-caps text-on-surface-variant" data-i18n="label_badge"></label>
+          <select id="new-badge" class="bg-surface-container rounded-lg py-3 px-3 border-none focus:ring-2 focus:ring-secondary-container text-sm outline-none">
+            <option value="" data-i18n-opt="badge_none"></option>
+            <option value="new" data-i18n-opt="badge_new"></option>
+            <option value="hot" data-i18n-opt="badge_hot"></option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeAddModal()" class="flex-1 h-12 border border-outline-variant rounded-lg text-on-surface font-semibold active:scale-95 transition-transform" data-i18n="cancel"></button>
+      <button onclick="saveNewItem()" id="save-item-btn" class="flex-1 h-12 bg-primary text-on-primary rounded-lg font-semibold active:scale-95 transition-transform" data-i18n="save"></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-xl text-sm font-semibold shadow-lg pointer-events-none text-white whitespace-nowrap"></div>
+
+<script>
+const API = window.location.origin;
+let SECRET = sessionStorage.getItem('adminSecret') || '';
+let currentFilter = 'all', menuFilter = 'all', newPhotoData = null, currentPage = 'orders';
+let allMenuItems = [], allCategories = [];
+const DEFAULT_CATEGORIES = [
+  {key:'food', label_uz:'Taomlar', label_ru:'Еда', sort_order:10},
+  {key:'salads', label_uz:'Salatlar', label_ru:'Салаты', sort_order:20},
+  {key:'drinks', label_uz:'Ichimliklar', label_ru:'Напитки', sort_order:30},
+  {key:'desserts', label_uz:'Shirinliklar', label_ru:'Десерты', sort_order:1000}
+];
+
+function fmt(n) {
+  return `${Math.round(Number(n) || 0).toLocaleString('ru-RU')} so'm`;
+}
+
+function formatUzDateTime(value) {
+  if (!value) return '-';
+  const raw = String(value).trim();
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+  if (match) {
+    const [, y, m, d, hh, mm] = match;
+    return `${d}.${m}.${y}${hh ? ` ${hh}:${mm}` : ''}`;
+  }
+  const dt = new Date(raw);
+  if (!Number.isNaN(dt.getTime())) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(dt.getDate())}.${pad(dt.getMonth() + 1)}.${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  }
+  return raw;
+}
+
+function makeCategoryKey(label) {
+  return label.trim().toLowerCase().replace(/[^a-z0-9а-яё]+/gi, '-').replace(/^-+|-+$/g, '') || `category-${Date.now()}`;
+}
+
+function deriveCategories(items) {
+  const seen = new Set(items.map(i => i.category));
+  const defaults = DEFAULT_CATEGORIES.filter(c => seen.has(c.key) || ['food','salads','drinks','desserts'].includes(c.key));
+  const extras = [...seen]
+    .filter(key => !defaults.some(c => c.key === key))
+    .map((key, i) => ({key, label_uz:key, label_ru:key, sort_order:100 + i}));
+  return [...defaults, ...extras].sort((a, b) => a.sort_order - b.sort_order);
+}
+
+// ── Translations ──────────────────────────────────────────
+const T = {
+  uz: {
+    portal: "ADMINISTRATOR PORTALI",
+    welcome: "Xush kelibsiz",
+    sign_in_sub: "Oshxonani boshqarish uchun kiring",
+    admin_secret: "Admin paroli",
+    secret_placeholder: "Admin parolini kiriting",
+    login_err: "Noto'g'ri parol. Qayta urinib ko'ring.",
+    sign_in: "Kirish",
+    secure: "Xavfsiz ulanish",
+    stat_today: "BUGUN",
+    stat_pending: "KUTILMOQDA",
+    stat_revenue: "DAROMAD",
+    filter_all: "Barchasi", filter_pending: "Kutilmoqda", filter_confirmed: "Tasdiqlangan",
+    filter_preparing: "Tayyorlanmoqda", filter_on_way: "Yo'lda",
+    filter_delivered: "Yetkazildi", filter_cancelled: "Bekor qilindi",
+    nav_orders: "Buyurtmalar", nav_menu: "Menyu", nav_statistics: "Statistika",
+    order_customer: "Mijoz", order_items_label: "Buyurtma mahsulotlari",
+    order_total: "Jami", order_update_status: "Holatni yangilash",
+    order_delete: "Buyurtmani o'chirish",
+    order_map: "Google Xaritada ko'rish",
+    del_order_title: "Buyurtmani o'chirasizmi?",
+    del_item_title: "Mahsulotni o'chirasizmi?",
+    del_sub: "Bu amalni bekor qilib bo'lmaydi.",
+    del_cancel: "Bekor qilish", del_confirm: "O'chirish",
+    menu_title: "Menyu mahsulotlari", add_item: "Qo'shish",
+    filter_all_items: "Barchasi",
+    cat_coffee: "Qahva", cat_drinks: "Ichimliklar", cat_food: "Taomlar", cat_salads: "Salatlar", cat_desserts: "Shirinliklar",
+    add_modal_title: "Mahsulot qo'shish",
+    photo_label: "Rasm qo'shish (ixtiyoriy)",
+    label_category: "KATEGORIYA", label_emoji: "EMOJI",
+    create_category: "Ochish", category_placeholder: "Yangi kategoriya nomi",
+    label_name: "MAHSULOT NOMI", label_desc: "TAVSIF",
+    label_price: "NARX (SO'M)", label_badge: "BELGI",
+    badge_none: "Yo'q", badge_new: "Yangi", badge_hot: "Mashhur",
+    name_placeholder: "masalan: To'y Oshi",
+    desc_placeholder: "Qisqa tavsif",
+    cancel: "Bekor qilish", save: "Saqlash",
+    avail_on: "YOQIQ", avail_off: "O'CHIQ",
+    status_pending: "Kutilmoqda", status_confirmed: "Tasdiqlangan",
+    status_preparing: "Tayyorlanmoqda", status_out_for_delivery: "Yo'lda",
+    status_delivered: "Yetkazildi", status_cancelled: "Bekor qilindi", status_deleted: "O'chirilgan",
+    stats_title: "Buyurtmalar statistikasi",
+    stats_download: "Excel yuklab olish",
+    stats_all_orders: "BARCHA BUYURTMALAR",
+    stats_net_revenue: "SOF DAROMAD",
+    stats_deleted: "O'CHIRILGAN",
+    stats_cancelled: "BEKOR QILINGAN",
+    stats_col_order: "Buyurtma",
+    stats_col_customer: "Mijoz",
+    stats_col_items: "Mahsulotlar",
+    stats_col_status: "Holat",
+    stats_col_total: "Jami",
+    stats_col_created: "Yaratilgan",
+    stats_col_deleted: "O'chirilgan",
+    stats_from: "BOSHLANISH SANASI",
+    stats_to: "TUGASH SANASI",
+    stats_apply: "Ko'rish",
+    stats_clear: "Tozalash",
+    toast_status: "Holat yangilandi",
+    toast_order_deleted: "Buyurtma o'chirildi",
+    toast_item_deleted: "Mahsulot o'chirildi",
+    toast_item_added: "Mahsulot qo'shildi",
+    toast_category_added: "Kategoriya ochildi",
+    toast_price_saved: "Narx saqlandi",
+    toast_failed: "Xatolik yuz berdi",
+    toast_name_req: "Nom kiritish shart",
+    toast_price_req: "To'g'ri narx kiriting",
+    toast_category_req: "Kategoriya nomini kiriting",
+    no_orders: "Buyurtmalar topilmadi",
+    loading: "Yuklanmoqda…",
+    saving: "Saqlanmoqda…",
+  },
+  ru: {
+    portal: "ПОРТАЛ АДМИНИСТРАТОРА",
+    welcome: "Добро пожаловать",
+    sign_in_sub: "Войдите для управления кухней",
+    admin_secret: "Пароль администратора",
+    secret_placeholder: "Введите пароль администратора",
+    login_err: "Неверный пароль. Попробуйте снова.",
+    sign_in: "Войти",
+    secure: "Безопасное соединение",
+    stat_today: "СЕГОДНЯ",
+    stat_pending: "ОЖИДАЮЩИХ",
+    stat_revenue: "ВЫРУЧКА",
+    filter_all: "Все", filter_pending: "Ожидает", filter_confirmed: "Подтверждён",
+    filter_preparing: "Готовится", filter_on_way: "В пути",
+    filter_delivered: "Доставлен", filter_cancelled: "Отменён",
+    nav_orders: "Заказы", nav_menu: "Меню", nav_statistics: "Статистика",
+    order_customer: "Клиент", order_items_label: "Позиции заказа",
+    order_total: "Итого", order_update_status: "Обновить статус",
+    order_delete: "Удалить заказ",
+    order_map: "Открыть в Google Картах",
+    del_order_title: "Удалить заказ?",
+    del_item_title: "Удалить позицию?",
+    del_sub: "Это действие необратимо.",
+    del_cancel: "Отмена", del_confirm: "Удалить",
+    menu_title: "Позиции меню", add_item: "Добавить",
+    filter_all_items: "Все",
+    cat_coffee: "Кофе", cat_drinks: "Напитки", cat_food: "Еда", cat_salads: "Салаты", cat_desserts: "Десерты",
+    add_modal_title: "Добавить позицию",
+    photo_label: "Добавить фото (необязательно)",
+    label_category: "КАТЕГОРИЯ", label_emoji: "EMOJI",
+    create_category: "Создать", category_placeholder: "Название новой категории",
+    label_name: "НАЗВАНИЕ", label_desc: "ОПИСАНИЕ",
+    label_price: "ЦЕНА (СУМ)", label_badge: "МЕТКА",
+    badge_none: "Нет", badge_new: "Новинка", badge_hot: "Популярное",
+    name_placeholder: "напр. Плов на свадьбу",
+    desc_placeholder: "Короткое описание",
+    cancel: "Отмена", save: "Сохранить",
+    avail_on: "ВКЛ", avail_off: "ВЫКЛ",
+    status_pending: "Ожидает", status_confirmed: "Подтверждён",
+    status_preparing: "Готовится", status_out_for_delivery: "В пути",
+    status_delivered: "Доставлен", status_cancelled: "Отменён", status_deleted: "Удалён",
+    stats_title: "Статистика заказов",
+    stats_download: "Скачать Excel",
+    stats_all_orders: "ВСЕ ЗАКАЗЫ",
+    stats_net_revenue: "ЧИСТАЯ ВЫРУЧКА",
+    stats_deleted: "УДАЛЁННЫЕ",
+    stats_cancelled: "ОТМЕНЁННЫЕ",
+    stats_col_order: "Заказ",
+    stats_col_customer: "Клиент",
+    stats_col_items: "Позиции",
+    stats_col_status: "Статус",
+    stats_col_total: "Итого",
+    stats_col_created: "Создан",
+    stats_col_deleted: "Удалён",
+    stats_from: "ДАТА С",
+    stats_to: "ДАТА ДО",
+    stats_apply: "Показать",
+    stats_clear: "Очистить",
+    toast_status: "Статус обновлён",
+    toast_order_deleted: "Заказ удалён",
+    toast_item_deleted: "Позиция удалена",
+    toast_item_added: "Позиция добавлена",
+    toast_category_added: "Категория создана",
+    toast_price_saved: "Цена сохранена",
+    toast_failed: "Ошибка",
+    toast_name_req: "Введите название",
+    toast_price_req: "Введите корректную цену",
+    toast_category_req: "Введите название категории",
+    no_orders: "Заказов не найдено",
+    loading: "Загрузка…",
+    saving: "Сохранение…",
+  }
+};
+
+let lang = localStorage.getItem('oshLang') || 'uz';
+
+function t(key) { return T[lang][key] !== undefined ? T[lang][key] : key; }
+
+function categoryLabel(cat) {
+  const found = allCategories.find(c => c.key === cat);
+  if (found) return lang === 'ru' ? (found.label_ru || found.label_uz) : found.label_uz;
+  const translated = t('cat_' + cat);
+  return translated === 'cat_' + cat ? cat : translated;
+}
+
+function renderMenuFilters() {
+  const filters = document.getElementById('menu-filters');
+  const cats = [{key:'all'}, ...allCategories];
+  filters.innerHTML = cats.map(cat => {
+    const active = cat.key === menuFilter;
+    const cls = active
+      ? 'menu-filter flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-primary text-on-primary shadow-md'
+      : 'menu-filter flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant';
+    const label = cat.key === 'all' ? t('filter_all_items') : categoryLabel(cat.key);
+    return `<button class="${cls}" onclick="setMenuFilter('${cat.key}',this)">${label}</button>`;
+  }).join('');
+}
+
+function renderCategorySelect(selected = null) {
+  const select = document.getElementById('new-cat');
+  if (!select) return;
+  select.innerHTML = allCategories.map(cat =>
+    `<option value="${cat.key}">${categoryLabel(cat.key)}</option>`
+  ).join('');
+  select.value = selected || select.value || allCategories[0]?.key || 'food';
+}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('oshLang', l);
+  applyTranslations();
+  updateLangBtns();
+  renderMenuFilters();
+  renderCategorySelect();
+  if (currentPage === 'menu') renderMenu();
+  if (currentPage === 'statistics') loadOrderStatistics();
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = T[lang][el.dataset.i18n];
+    if (typeof v === 'string') el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = T[lang][el.dataset.i18nPh];
+    if (typeof v === 'string') el.placeholder = v;
+  });
+  document.querySelectorAll('[data-i18n-opt]').forEach(el => {
+    const v = T[lang][el.dataset.i18nOpt];
+    if (typeof v === 'string') el.textContent = v;
+  });
+}
+
+function updateLangBtns() {
+  document.querySelectorAll('[data-lang]').forEach(b => {
+    const active = b.dataset.lang === lang;
+    b.style.background = active ? '#006d37' : 'transparent';
+    b.style.color = active ? '#ffffff' : '#3d4a3f';
+  });
+}
+
+// ── Auth ──────────────────────────────────────────────────
+function doLogin(e) {
+  e.preventDefault();
+  SECRET = document.getElementById('login-secret').value.trim();
+  fetch(API + '/api/admin/stats', { headers: {'X-Admin-Secret': SECRET} })
+    .then(r => {
+      if (r.ok) {
+        sessionStorage.setItem('adminSecret', SECRET);
+        document.getElementById('login-err').classList.add('hidden');
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadStats(); loadOrders();
+      } else {
+        document.getElementById('login-err').classList.remove('hidden');
+        document.getElementById('login-secret').value = '';
+      }
+    }).catch(() => document.getElementById('login-err').classList.remove('hidden'));
+}
+
+function doLogout() {
+  sessionStorage.removeItem('adminSecret'); SECRET = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function togglePwd() {
+  const inp = document.getElementById('login-secret');
+  const eye = document.getElementById('pwd-eye');
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = 'visibility_off'; }
+  else { inp.type = 'password'; eye.textContent = 'visibility'; }
+}
+
+if (SECRET) {
+  fetch(API + '/api/admin/stats', { headers: {'X-Admin-Secret': SECRET} })
+    .then(r => {
+      if (r.ok) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadStats(); loadOrders();
+      } else { sessionStorage.removeItem('adminSecret'); SECRET = ''; }
+    }).catch(() => {});
+}
+
+// ── Navigation ────────────────────────────────────────────
+function showPage(name) {
+  currentPage = name;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'orders') { loadStats(); loadOrders(); }
+  if (name === 'statistics') loadOrderStatistics();
+  if (name === 'menu') loadMenu();
+}
+
+function refreshCurrent() {
+  if (currentPage === 'orders') { loadStats(); loadOrders(); }
+  else if (currentPage === 'statistics') loadOrderStatistics();
+  else loadMenu();
+}
+
+// ── Stats ─────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch(API + '/api/admin/stats', { headers: {'X-Admin-Secret': SECRET} });
+    const d = await r.json();
+    document.getElementById('stat-today').textContent = d.today_orders;
+    document.getElementById('stat-pending').textContent = d.pending;
+    document.getElementById('stat-revenue').textContent = fmt(d.revenue);
+  } catch(e) {}
+}
+
+// ── Orders ────────────────────────────────────────────────
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[ch]));
+}
+
+async function loadOrderStatistics() {
+  const el = document.getElementById('statistics-list');
+  el.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-on-surface-variant">${t('loading')}</td></tr>`;
+  try {
+    const r = await fetch(API + '/api/admin/order-statistics' + statisticsDateQuery(), { headers: {'X-Admin-Secret': SECRET} });
+    if (!r.ok) throw new Error('Statistics unavailable');
+    const d = await r.json();
+    document.getElementById('hist-total').textContent = d.summary.total_orders;
+    document.getElementById('hist-net').textContent = fmt(d.summary.net_revenue);
+    document.getElementById('hist-deleted').textContent = d.summary.deleted_orders;
+    document.getElementById('hist-cancelled').textContent = d.summary.cancelled_orders;
+    renderOrderStatistics(d.orders);
+  } catch(e) {
+    el.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-error">${t('toast_failed')}</td></tr>`;
+  }
+}
+
+function statisticsDateQuery(includeSecret = false) {
+  const params = new URLSearchParams();
+  const from = document.getElementById('stats-date-from')?.value;
+  const to = document.getElementById('stats-date-to')?.value;
+  if (from) params.set('date_from', from.trim());
+  if (to) params.set('date_to', to.trim());
+  if (includeSecret) params.set('x_admin_secret', SECRET);
+  const qs = params.toString();
+  return qs ? `?${qs}` : '';
+}
+
+function clearStatisticsDates() {
+  document.getElementById('stats-date-from').value = '';
+  document.getElementById('stats-date-to').value = '';
+  document.getElementById('stats-date-from-display').value = '';
+  document.getElementById('stats-date-to-display').value = '';
+  closeStatsCalendars();
+  loadOrderStatistics();
+}
+
+function renderOrderStatistics(orders) {
+  const el = document.getElementById('statistics-list');
+  if (!orders.length) {
+    el.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-on-surface-variant">${t('no_orders')}</td></tr>`;
+    return;
+  }
+  el.innerHTML = orders.map(o => {
+    const sc = STATUS_STYLE[o.status] || STATUS_STYLE.pending;
+    const itemCount = o.items.reduce((sum, i) => sum + (Number(i.qty) || 0), 0);
+    const statusLabel = t('status_' + o.status) || o.status;
+    return `
+      <tr class="hover:bg-surface-container-low">
+        <td class="px-4 py-3 font-semibold text-on-surface">${esc(o.order_number)}</td>
+        <td class="px-4 py-3">
+          <p class="font-medium text-on-surface">${esc(o.customer_name)}</p>
+          <p class="text-xs text-on-surface-variant">${esc(o.customer_phone)}</p>
+        </td>
+        <td class="px-4 py-3 text-on-surface-variant">${itemCount}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md font-label-caps text-[10px] uppercase tracking-wider ${sc}">${esc(statusLabel)}</span></td>
+        <td class="px-4 py-3 text-right font-semibold text-primary">${fmt(o.total)}</td>
+        <td class="px-4 py-3 text-on-surface-variant whitespace-nowrap">${esc(formatUzDateTime(o.created_at))}</td>
+        <td class="px-4 py-3 text-on-surface-variant whitespace-nowrap">${esc(formatUzDateTime(o.deleted_at))}</td>
+      </tr>`;
+  }).join('');
+}
+
+const STATS_MONTHS = {
+  uz: ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'],
+  ru: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь']
+};
+const STATS_WEEKDAYS = {
+  uz: ['Du','Se','Ch','Pa','Ju','Sh','Ya'],
+  ru: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']
+};
+const statsCalendar = {
+  from: new Date(),
+  to: new Date()
+};
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+function isoDateFromLocal(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
+function uzDateFromLocal(d) { return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()}`; }
+
+function dateFromIso(value) {
+  const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date();
+}
+
+function openStatsCalendar(which) {
+  closeStatsCalendars(which);
+  const current = document.getElementById(`stats-date-${which}`).value;
+  statsCalendar[which] = current ? dateFromIso(current) : new Date();
+  renderStatsCalendar(which);
+  document.getElementById(`stats-cal-${which}`).classList.remove('hidden');
+}
+
+function closeStatsCalendars(except = null) {
+  ['from', 'to'].forEach(which => {
+    if (which !== except) document.getElementById(`stats-cal-${which}`)?.classList.add('hidden');
+  });
+}
+
+function shiftStatsCalendar(which, months) {
+  const d = statsCalendar[which];
+  statsCalendar[which] = new Date(d.getFullYear(), d.getMonth() + months, 1);
+  renderStatsCalendar(which);
+}
+
+function selectStatsDate(which, year, month, day) {
+  const picked = new Date(year, month, day);
+  document.getElementById(`stats-date-${which}`).value = isoDateFromLocal(picked);
+  document.getElementById(`stats-date-${which}-display`).value = uzDateFromLocal(picked);
+  closeStatsCalendars();
+}
+
+function renderStatsCalendar(which) {
+  const host = document.getElementById(`stats-cal-${which}`);
+  const view = statsCalendar[which];
+  const year = view.getFullYear();
+  const month = view.getMonth();
+  const monthNames = STATS_MONTHS[lang] || STATS_MONTHS.uz;
+  const weekdays = STATS_WEEKDAYS[lang] || STATS_WEEKDAYS.uz;
+  const first = new Date(year, month, 1);
+  const startOffset = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const selected = document.getElementById(`stats-date-${which}`).value;
+  let cells = '';
+  for (let i = 0; i < startOffset; i++) {
+    cells += '<div class="h-9"></div>';
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const iso = `${year}-${pad2(month + 1)}-${pad2(day)}`;
+    const active = selected === iso;
+    cells += `<button type="button" data-cal-action="select" data-cal="${which}" data-year="${year}" data-month="${month}" data-day="${day}" class="h-9 rounded-lg text-sm font-semibold transition-colors ${active ? 'bg-primary text-on-primary' : 'text-on-surface hover:bg-surface-container-high'}">${day}</button>`;
+  }
+  host.innerHTML = `
+    <div class="flex items-center justify-between mb-3">
+      <button type="button" data-cal-action="shift" data-cal="${which}" data-months="-1" class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-surface-container-high">
+        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+      </button>
+      <div class="font-semibold text-on-surface">${monthNames[month]} ${year}</div>
+      <button type="button" data-cal-action="shift" data-cal="${which}" data-months="1" class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-surface-container-high">
+        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+      </button>
+    </div>
+    <div class="calendar-grid mb-1">${weekdays.map(d => `<div class="text-center text-[11px] font-bold text-on-surface-variant">${d}</div>`).join('')}</div>
+    <div class="calendar-grid">${cells}</div>
+  `;
+}
+
+document.addEventListener('click', e => {
+  const calButton = e.target.closest('[data-cal-action]');
+  if (calButton) {
+    e.preventDefault();
+    e.stopPropagation();
+    const which = calButton.dataset.cal;
+    if (calButton.dataset.calAction === 'shift') {
+      shiftStatsCalendar(which, Number(calButton.dataset.months));
+    } else if (calButton.dataset.calAction === 'select') {
+      selectStatsDate(
+        which,
+        Number(calButton.dataset.year),
+        Number(calButton.dataset.month),
+        Number(calButton.dataset.day)
+      );
+    }
+    return;
+  }
+  if (!e.target.closest('.stats-date-picker')) {
+    closeStatsCalendars();
+  }
+});
+
+function downloadStatistics() {
+  window.location.href = `${API}/api/admin/order-statistics/export${statisticsDateQuery(true)}`;
+}
+
+const STATUS_STYLE = {
+  pending:          'bg-[rgba(232,197,58,0.18)] text-[#8a6a00]',
+  confirmed:        'bg-primary/10 text-primary',
+  preparing:        'bg-secondary-container/50 text-secondary',
+  out_for_delivery: 'bg-primary/10 text-primary',
+  delivered:        'bg-primary/15 text-primary',
+  cancelled:        'bg-error/10 text-error',
+  deleted:          'bg-error/10 text-error'
+};
+
+async function loadOrders() {
+  const el = document.getElementById('orders-list');
+  el.innerHTML = `<div class="text-center py-12 text-on-surface-variant">${t('loading')}</div>`;
+  try {
+    const url = currentFilter === 'all' ? '/api/admin/orders' : `/api/admin/orders?status=${currentFilter}`;
+    const r = await fetch(API + url, { headers: {'X-Admin-Secret': SECRET} });
+    renderOrders(await r.json());
+  } catch(e) {
+    el.innerHTML = `<div class="text-center py-12 text-error text-sm">${t('toast_failed')}</div>`;
+  }
+}
+
+function renderOrders(orders) {
+  const el = document.getElementById('orders-list');
+  if (!orders.length) {
+    el.innerHTML = `<div class="flex flex-col items-center justify-center py-20 gap-3 text-on-surface-variant">
+      <span class="material-symbols-outlined text-5xl opacity-30">receipt_long</span>
+      <p class="font-semibold">${t('no_orders')}</p></div>`;
+    return;
+  }
+  const statuses = ['pending','confirmed','preparing','out_for_delivery','delivered','cancelled'];
+  el.innerHTML = orders.map(o => {
+    const sc = STATUS_STYLE[o.status] || STATUS_STYLE.pending;
+    const statusLabel = t('status_' + o.status) || o.status;
+    const mapLink = (o.lat && o.lon)
+      ? `<a href="https://maps.google.com/?q=${o.lat},${o.lon}" target="_blank" class="inline-flex items-center gap-1 text-primary text-sm font-semibold mt-2 hover:underline"><span class="material-symbols-outlined text-sm">map</span>${t('order_map')}</a>`
+      : '';
+    const itemRows = o.items.map(i =>
+      `<div class="flex justify-between text-sm py-1"><span>${i.emoji} ${i.name} ×${i.qty}</span><span class="text-on-surface-variant">${fmt(i.price * i.qty)}</span></div>`
+    ).join('');
+    const statusBtns = statuses.map(s =>
+      `<button onclick="updateStatus(${o.id},'${s}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all active:scale-95 ${o.status===s ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary'}">${t('status_' + s)}</button>`
+    ).join('');
+
+    return `
+    <div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(218,165,32,0.06)] overflow-hidden border border-outline-variant/20">
+      <div class="p-5 flex justify-between items-start cursor-pointer" onclick="toggleOrder(${o.id})">
+        <div>
+          <div class="flex items-center gap-3 mb-1 flex-wrap">
+            <span class="font-semibold text-on-surface">${o.order_number}</span>
+            <span class="px-2 py-0.5 rounded-md font-label-caps text-[10px] uppercase tracking-wider ${sc}">${statusLabel}</span>
+          </div>
+          <p class="text-on-surface-variant text-sm">${o.customer_name} · ${o.items.length} · ${fmt(o.total)}</p>
+          <p class="text-on-surface-variant text-xs mt-0.5 opacity-70">${formatUzDateTime(o.created_at)}</p>
+        </div>
+        <span id="arrow-${o.id}" class="material-symbols-outlined text-on-surface-variant mt-1 flex-shrink-0">keyboard_arrow_down</span>
+      </div>
+      <div id="detail-${o.id}" class="hidden px-5 pb-5 border-t border-surface-container-high">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 mb-4">
+          <div>
+            <p class="font-label-caps text-label-caps text-on-surface-variant mb-2">${t('order_customer')}</p>
+            <p class="font-semibold text-on-surface">${o.customer_name}</p>
+            <p class="text-sm text-on-surface-variant">${o.customer_phone}</p>
+            <p class="text-sm text-on-surface-variant mt-1">${o.delivery_address}, ${o.delivery_city}${o.delivery_zip?' '+o.delivery_zip:''}</p>
+            ${o.delivery_notes?`<p class="text-sm text-on-surface-variant italic mt-1 opacity-80">${o.delivery_notes}</p>`:''}
+            ${mapLink}
+          </div>
+          <div class="bg-surface-container-low rounded-xl p-4">
+            <p class="font-label-caps text-label-caps text-on-surface-variant mb-2">${t('order_items_label')}</p>
+            ${itemRows}
+            <div class="border-t border-outline-variant/30 mt-2 pt-2 flex justify-between font-semibold text-sm">
+              <span>${t('order_total')}</span><span class="text-primary">${fmt(o.total)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="mb-4">
+          <p class="font-label-caps text-label-caps text-on-surface-variant mb-2">${t('order_update_status')}</p>
+          <div class="flex flex-wrap gap-2">${statusBtns}</div>
+        </div>
+        <button onclick="openDelModal(${o.id},'order')" class="flex items-center gap-1.5 text-error text-sm font-semibold hover:opacity-70 transition-opacity">
+          <span class="material-symbols-outlined text-[18px]">delete</span> ${t('order_delete')}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleOrder(id) {
+  const detail = document.getElementById('detail-' + id);
+  const arrow  = document.getElementById('arrow-' + id);
+  const isOpen = !detail.classList.contains('hidden');
+  detail.classList.toggle('hidden', isOpen);
+  arrow.textContent = isOpen ? 'keyboard_arrow_down' : 'keyboard_arrow_up';
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.className = 'filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant';
+  });
+  el.className = 'filter-btn flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-primary text-on-primary shadow-md';
+  loadOrders();
+}
+
+async function updateStatus(orderId, status) {
+  try {
+    const r = await fetch(`${API}/api/admin/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','X-Admin-Secret': SECRET},
+      body: JSON.stringify({ status })
+    });
+    if (r.ok) { toast(t('toast_status')); loadOrders(); loadStats(); }
+    else toast(t('toast_failed'), true);
+  } catch(e) { toast(t('toast_failed'), true); }
+}
+
+// ── Delete Modal ──────────────────────────────────────────
+function openDelModal(id, type) {
+  const modal = document.getElementById('del-modal');
+  document.getElementById('del-title').textContent = type === 'order' ? t('del_order_title') : t('del_item_title');
+  modal.classList.remove('hidden'); modal.style.display = 'flex';
+  document.getElementById('del-confirm-btn').onclick = () => {
+    if (type === 'order') deleteOrder(id); else deleteMenuItem(id);
+  };
+}
+function closeDelModal() {
+  const modal = document.getElementById('del-modal');
+  modal.classList.add('hidden'); modal.style.display = 'none';
+}
+
+async function deleteOrder(id) {
+  closeDelModal();
+  try {
+    const r = await fetch(`${API}/api/admin/orders/${id}`, { method: 'DELETE', headers: {'X-Admin-Secret': SECRET} });
+    if (r.ok) { toast(t('toast_order_deleted')); loadOrders(); loadStats(); }
+    else toast(t('toast_failed'), true);
+  } catch(e) { toast(t('toast_failed'), true); }
+}
+
+// ── Menu ──────────────────────────────────────────────────
+async function loadMenu() {
+  const el = document.getElementById('menu-grid');
+  el.innerHTML = `<div class="text-center py-12 text-on-surface-variant col-span-full">${t('loading')}</div>`;
+  try {
+    const menuRes = await fetch(API + '/api/admin/menu', { headers: {'X-Admin-Secret': SECRET} });
+    if (!menuRes.ok) throw new Error('Menu unavailable');
+    allMenuItems = await menuRes.json();
+    try {
+      const catRes = await fetch(API + '/api/admin/categories', { headers: {'X-Admin-Secret': SECRET} });
+      if (!catRes.ok) throw new Error('Categories unavailable');
+      allCategories = await catRes.json();
+    } catch(e) {
+      allCategories = deriveCategories(allMenuItems);
+    }
+    if (menuFilter !== 'all' && !allCategories.some(c => c.key === menuFilter)) menuFilter = 'all';
+    renderMenuFilters();
+    renderCategorySelect();
+    renderMenu();
+  } catch(e) {
+    el.innerHTML = `<div class="text-center py-12 text-error col-span-full text-sm">${t('toast_failed')}</div>`;
+  }
+}
+
+function renderMenu() {
+  const items = menuFilter === 'all' ? allMenuItems : allMenuItems.filter(i => i.category === menuFilter);
+  const el = document.getElementById('menu-grid');
+  if (!items.length) { el.innerHTML = `<div class="text-center py-12 text-on-surface-variant col-span-full">${t('no_orders')}</div>`; return; }
+  el.innerHTML = items.map(item => {
+    const avail = item.available === 1;
+    const img = item.photo
+      ? `<img class="w-full h-full object-cover" src="${item.photo}" alt="${item.name}">`
+      : `<div class="w-full h-full flex items-center justify-center text-3xl bg-surface-container">${item.emoji}</div>`;
+    return `
+    <div class="bg-surface-container-lowest rounded-xl p-3 flex gap-3 shadow-[0_4px_12px_rgba(218,165,32,0.06)] border border-outline-variant/20 ${avail?'':'opacity-60'}">
+      <div class="w-24 h-24 shrink-0 overflow-hidden rounded-lg border border-secondary/10">${img}</div>
+      <div class="flex-1 flex flex-col justify-between min-w-0">
+        <div>
+          <div class="flex justify-between items-start">
+            <h3 class="font-semibold text-on-surface text-sm leading-tight">${item.name}</h3>
+            <button onclick="openDelModal(${item.id},'item')" class="text-error/50 hover:text-error transition-colors p-1 flex-shrink-0">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+          </div>
+          <p class="text-xs text-on-surface-variant mt-1 line-clamp-1">${item.description||''}</p>
+        </div>
+        <div class="flex items-center justify-between mt-2">
+          <div class="flex items-center gap-1 border-b border-outline-variant pb-0.5">
+            <span class="text-primary font-bold text-sm">so'm</span>
+            <input id="price-${item.id}" type="number" step="1000" value="${Math.round(item.price)}"
+              onchange="priceChanged(${item.id})"
+              class="bg-transparent border-none p-0 w-14 focus:ring-0 font-bold text-sm text-on-surface outline-none"/>
+            <button id="save-price-${item.id}" onclick="savePrice(${item.id})" class="hidden text-primary hover:opacity-70 active:scale-90">
+              <span class="material-symbols-outlined text-[16px]">check</span>
+            </button>
+          </div>
+          <button onclick="toggleAvail(${item.id}, ${avail?0:1})" class="flex items-center gap-1.5">
+            <div class="w-10 h-5 ${avail?'bg-primary-container':'bg-surface-variant'} rounded-full relative flex items-center px-0.5 transition-colors">
+              <div class="w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${avail?'translate-x-5':'translate-x-0'}"></div>
+            </div>
+            <span class="font-label-caps text-[10px] ${avail?'text-primary':'text-on-surface-variant'}">${avail?t('avail_on'):t('avail_off')}</span>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function priceChanged(id) { document.getElementById('save-price-' + id).classList.remove('hidden'); }
+
+async function savePrice(id) {
+  const val = parseFloat(document.getElementById('price-' + id).value);
+  if (isNaN(val) || val <= 0) return;
+  try {
+    const r = await fetch(`${API}/api/admin/menu/${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','X-Admin-Secret': SECRET},
+      body: JSON.stringify({ price: val })
+    });
+    if (r.ok) { toast(t('toast_price_saved')); document.getElementById('save-price-' + id).classList.add('hidden'); loadMenu(); }
+    else toast(t('toast_failed'), true);
+  } catch(e) { toast(t('toast_failed'), true); }
+}
+
+async function toggleAvail(id, val) {
+  try {
+    const r = await fetch(`${API}/api/admin/menu/${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','X-Admin-Secret': SECRET},
+      body: JSON.stringify({ available: val })
+    });
+    if (r.ok) loadMenu(); else toast(t('toast_failed'), true);
+  } catch(e) { toast(t('toast_failed'), true); }
+}
+
+function setMenuFilter(f, el) {
+  menuFilter = f;
+  document.querySelectorAll('.menu-filter').forEach(b => {
+    b.className = 'menu-filter flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant';
+  });
+  el.className = 'menu-filter flex-none px-5 py-2 rounded-full font-label-caps text-label-caps bg-primary text-on-primary shadow-md';
+  renderMenu();
+}
+
+function toggleNewCategory() {
+  document.getElementById('new-category-box').classList.toggle('hidden');
+  document.getElementById('new-category-name').focus();
+}
+
+async function createCategory() {
+  const input = document.getElementById('new-category-name');
+  const label = input.value.trim();
+  if (!label) { toast(t('toast_category_req'), true); return; }
+  try {
+    const fallbackCategory = {
+      key: makeCategoryKey(label),
+      label_uz: label,
+      label_ru: label,
+      sort_order: Math.min(Math.max(...allCategories.map(c => c.sort_order || 30).filter(n => n < 1000), 30) + 10, 990)
+    };
+    const r = await fetch(API + '/api/admin/categories', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-Admin-Secret': SECRET},
+      body: JSON.stringify({ label_uz: label, label_ru: label })
+    });
+    const data = r.ok ? await r.json() : fallbackCategory;
+    if (!r.ok && allCategories.some(c => c.key === data.key)) {
+      data.key = `${data.key}-${Date.now()}`;
+    }
+    allCategories.push(data);
+    renderMenuFilters();
+    renderCategorySelect(data.key);
+    input.value = '';
+    document.getElementById('new-category-box').classList.add('hidden');
+    toast(t('toast_category_added'));
+  } catch(e) {
+    const data = {
+      key: makeCategoryKey(label),
+      label_uz: label,
+      label_ru: label,
+      sort_order: Math.min(Math.max(...allCategories.map(c => c.sort_order || 30).filter(n => n < 1000), 30) + 10, 990)
+    };
+    if (allCategories.some(c => c.key === data.key)) data.key = `${data.key}-${Date.now()}`;
+    allCategories.push(data);
+    renderMenuFilters();
+    renderCategorySelect(data.key);
+    input.value = '';
+    document.getElementById('new-category-box').classList.add('hidden');
+    toast(t('toast_category_added'));
+  }
+}
+
+async function deleteMenuItem(id) {
+  closeDelModal();
+  try {
+    const r = await fetch(`${API}/api/admin/menu/${id}`, { method: 'DELETE', headers: {'X-Admin-Secret': SECRET} });
+    if (r.ok) { toast(t('toast_item_deleted')); loadMenu(); }
+    else toast(t('toast_failed'), true);
+  } catch(e) { toast(t('toast_failed'), true); }
+}
+
+// ── Add Item ──────────────────────────────────────────────
+function openAddModal() {
+  newPhotoData = null;
+  document.getElementById('photo-preview').classList.add('hidden');
+  document.getElementById('photo-placeholder').classList.remove('hidden');
+  document.getElementById('photo-file').value = '';
+  ['new-name','new-desc','new-price','new-emoji'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('new-badge').value = '';
+  document.getElementById('new-category-name').value = '';
+  document.getElementById('new-category-box').classList.add('hidden');
+  renderCategorySelect();
+  document.getElementById('add-modal').classList.remove('hidden');
+  document.getElementById('add-modal').style.display = 'flex';
+}
+function closeAddModal() {
+  document.getElementById('add-modal').classList.add('hidden');
+  document.getElementById('add-modal').style.display = 'none';
+}
+
+function handlePhotoUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.getElementById('photo-canvas');
+      const max = 600; let w = img.width, h = img.height;
+      if (w > max || h > max) { if (w > h) { h = h*max/w; w = max; } else { w = w*max/h; h = max; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      newPhotoData = canvas.toDataURL('image/jpeg', 0.8);
+      const prev = document.getElementById('photo-preview');
+      prev.src = newPhotoData; prev.classList.remove('hidden');
+      document.getElementById('photo-placeholder').classList.add('hidden');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveNewItem() {
+  const name  = document.getElementById('new-name').value.trim();
+  const price = parseFloat(document.getElementById('new-price').value);
+  if (!name) { toast(t('toast_name_req'), true); return; }
+  if (!price || price <= 0) { toast(t('toast_price_req'), true); return; }
+  const btn = document.getElementById('save-item-btn');
+  btn.disabled = true; btn.textContent = t('saving');
+  try {
+    const r = await fetch(API + '/api/admin/menu', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-Admin-Secret': SECRET},
+      body: JSON.stringify({
+        category: document.getElementById('new-cat').value,
+        emoji: document.getElementById('new-emoji').value.trim() || '🍽',
+        name, description: document.getElementById('new-desc').value.trim(),
+        price, badge: document.getElementById('new-badge').value || null,
+        photo: newPhotoData || null
+      })
+    });
+    if (r.ok) { closeAddModal(); toast(t('toast_item_added')); loadMenu(); }
+    else toast(t('toast_failed'), true);
+  } catch(e) { toast(t('toast_failed'), true); }
+  btn.disabled = false; btn.textContent = t('save');
+}
+
+// ── Toast ─────────────────────────────────────────────────
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-xl text-sm font-semibold shadow-lg pointer-events-none text-white ${err?'bg-error':'bg-primary'}`;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 2500);
+}
+
+// Init
+applyTranslations();
+updateLangBtns();
+</script>
+</body>
+</html>
