@@ -449,6 +449,34 @@ async def place_order(req: PlaceOrderRequest, db: sqlite3.Connection = Depends(g
     asyncio.create_task(send_telegram_notification(order, items))
     return {"success": True, "order_number": order_number, "total": total}
 
+@app.get("/api/orders/history/{telegram_user_id}")
+def get_order_history(
+    telegram_user_id: str,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    rows = db.execute(
+        """
+        SELECT order_number, items, total, status, created_at
+        FROM orders
+        WHERE telegram_user_id=?
+        ORDER BY created_at DESC
+        LIMIT 50
+        """,
+        (telegram_user_id,)
+    ).fetchall()
+    history = []
+    for row in rows:
+        order = dict(row)
+        items = json.loads(order["items"])
+        order["items_summary"] = "  ".join(
+            f"{item.get('emoji','')} {item.get('name','')}x{item.get('qty', 0)}"
+            for item in items
+        )
+        order["date"] = format_uz_datetime(order["created_at"])
+        order.pop("items", None)
+        history.append(order)
+    return history
+
 @app.get("/api/orders/{order_number}/status")
 def get_order_status(order_number: str, db: sqlite3.Connection = Depends(get_db)):
     row = db.execute("SELECT status, created_at FROM orders WHERE order_number=?", (order_number,)).fetchone()

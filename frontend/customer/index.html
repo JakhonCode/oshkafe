@@ -995,7 +995,17 @@ function removeOrderFromHistory(orderNumber) {
 }
 
 async function renderOrderHistory() {
-  const saved = JSON.parse(localStorage.getItem('cafeOrders')||'[]');
+  let saved = JSON.parse(localStorage.getItem('cafeOrders')||'[]');
+  const userId = tg?.initDataUnsafe?.user?.id?.toString();
+  if (userId) {
+    try {
+      const r = await fetch(API + '/api/orders/history/' + encodeURIComponent(userId));
+      if (r.ok) {
+        saved = await r.json();
+        localStorage.setItem('cafeOrders', JSON.stringify(saved));
+      }
+    } catch(e) {}
+  }
   const el = document.getElementById('hist-list');
   if (saved.length === 0) {
     el.innerHTML = `<div class="flex flex-col items-center justify-center py-24 gap-4 text-on-surface-variant">
@@ -1041,6 +1051,21 @@ async function renderOrderHistory() {
 }
 
 // ── Navigation ────────────────────────────────────────────
+async function syncOrderHistoryBadge() {
+  const userId = tg?.initDataUnsafe?.user?.id?.toString();
+  if (!userId) return;
+  try {
+    const r = await fetch(API + '/api/orders/history/' + encodeURIComponent(userId));
+    if (r.ok) {
+      const orders = await r.json();
+      if (orders.length) {
+        localStorage.setItem('cafeOrders', JSON.stringify(orders));
+        document.getElementById('hist-btn').classList.remove('hidden');
+      }
+    }
+  } catch(e) {}
+}
+
 const NAV_SCREENS = ['s-menu','s-cart','s-orders'];
 
 function goTo(id) {
@@ -1075,6 +1100,7 @@ applyTranslations();
 updateLangBtns();
 setupCheckoutFocusBehavior();
 loadMenu();
+syncOrderHistoryBadge();
 </script>
 </body>
 </html>
